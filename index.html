@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="robots" content="noindex, nofollow" />
+  <meta name="theme-color" content="#000000" />
+  <meta name="color-scheme" content="dark" />
+  <meta name="description" content="Life Fellowship Church — Secure Weekly Treasurer Breakdown &amp; Operations Admin PWA" />
+
+  <!-- iOS Safari Standalone App Meta Tags -->
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="LFC ADMIN" />
+
+  <title>LFC ADMIN | Treasurer &amp; Church Operations</title>
+
+  <!-- Icons & PWA Manifest -->
+  <link rel="manifest" href="./manifest.json" />
+  <link rel="icon" type="image/png" sizes="64x64" href="./icons/favicon-64.png" />
+  <link rel="icon" type="image/png" sizes="192x192" href="./icons/icon-192.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="./icons/apple-touch-icon.png" />
+
+  <!-- Google Fonts: Righteous, Montserrat, Quicksand (v2.0 deltonanaz.com Visual Identity) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700;800&amp;family=Quicksand:wght@500;600;700&amp;family=Righteous&amp;display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="./css/app.css" />
+</head>
+<body>
+  <!-- ========================================================================
+       1. BRANDED SECURITY VAULT / LOGIN GATE (#login-view)
+       Zero financial figures exist in client HTML/JS prior to server auth.
+       ======================================================================== -->
+  <main id="login-view" class="vault-screen" aria-labelledby="vault-title">
+    <div class="vault-card">
+      <div class="vault-card__glow" aria-hidden="true"></div>
+      <div class="vault-header">
+        <img src="./icons/shield-badge.png" alt="Life Fellowship Church 3D Shield Emblem" class="vault-logo" width="84" height="84" />
+        <span class="eyebrow-badge">DELTONANAZ.COM &bull; SECURE STAFF EXTENSION</span>
+        <h1 id="vault-title" class="vault-title">LFC ADMIN</h1>
+        <p class="vault-subtitle">Weekly Treasurer Breakdown &amp; Cash Position Portal</p>
+      </div>
+
+      <form id="login-form" class="vault-form" novalidate>
+        <div class="field-group">
+          <label for="passcode-input" class="field-label">ADMIN PASSCODE</label>
+          <div class="passcode-wrap">
+            <input
+              type="password"
+              id="passcode-input"
+              name="passcode"
+              class="text-input passcode-input"
+              placeholder="Enter staff passcode"
+              autocomplete="current-password"
+              autocapitalize="characters"
+              spellcheck="false"
+              required
+            />
+            <button type="button" id="toggle-passcode-btn" class="icon-btn passcode-eye" aria-label="Show passcode" title="Show or hide passcode">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                <circle cx="12" cy="12" r="3"></circle>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="session-options">
+          <label class="checkbox-row">
+            <input type="checkbox" id="persist-session-chk" checked />
+            <span>Keep unlocked for this tab session</span>
+          </label>
+          <label class="checkbox-row">
+            <input type="checkbox" id="remember-device-chk" />
+            <span>Encrypted 12-hour device unlock</span>
+          </label>
+        </div>
+
+        <div id="login-error" class="alert-banner alert-banner--crimson" role="alert" hidden></div>
+
+        <button type="submit" id="unlock-btn" class="btn btn--gold btn--full">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+            <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+          </svg>
+          <span id="unlock-btn-label">UNLOCK TREASURER VAULT</span>
+        </button>
+      </form>
+
+      <details id="vault-endpoint-details" class="endpoint-drawer">
+        <summary class="endpoint-drawer__summary">
+          <span>Google Apps Script Sync Endpoint</span>
+          <span id="endpoint-status-pill" class="mini-pill">Check</span>
+        </summary>
+        <div class="endpoint-drawer__body">
+          <p class="helper-copy">
+            Passcode verification and live two-way Google Sheets reads/writes execute over HTTPS against your Google Apps Script Web App bound to <code>Weekly Treasurer Meeting Breakdown</code>.
+          </p>
+          <label for="vault-api-url" class="field-label">WEB APP EXEC URL</label>
+          <input
+            type="url"
+            id="vault-api-url"
+            class="text-input text-input--mono"
+            placeholder="https://script.google.com/macros/s/.../exec"
+            spellcheck="false"
+          />
+          <div class="endpoint-drawer__actions">
+            <button type="button" id="save-vault-endpoint-btn" class="btn btn--outline btn--sm">Save Endpoint</button>
+          </div>
+        </div>
+      </details>
+
+      <div class="vault-footer">
+        <button type="button" id="vault-install-btn" class="link-btn">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect>
+            <line x1="12" y1="18" x2="12.01" y2="18"></line>
+          </svg>
+          Install App on Phone
+        </button>
+        <span class="dot-sep" aria-hidden="true">&bull;</span>
+        <a href="https://deltonanaz.com" class="link-btn" rel="noopener">Back to deltonanaz.com</a>
+      </div>
+    </div>
+  </main>
+
+  <!-- ========================================================================
+       2. AUTHENTICATED EXECUTIVE DASHBOARD (#dashboard-view)
+       Hidden until server-side passcode check succeeds.
+       ======================================================================== -->
+  <div id="dashboard-view" class="app-shell" hidden>
+    <!-- Top Sticky App Header -->
+    <header class="topbar no-print" role="banner">
+      <div class="topbar__inner">
+        <div class="topbar__brand">
+          <img src="./icons/shield-badge.png" alt="LFC Shield" class="topbar__logo" width="38" height="38" />
+          <div class="topbar__titles">
+            <div class="topbar__title-row">
+              <span class="topbar__name">LFC ADMIN</span>
+              <span id="sync-badge" class="sync-pill sync-pill--synced">SYNCED</span>
+            </div>
+            <span class="topbar__sub">Weekly Treasurer Breakdown</span>
+          </div>
+        </div>
+
+        <div class="topbar__actions">
+          <label class="autosave-toggle" title="Automatically sync changes 2 seconds after editing">
+            <input type="checkbox" id="autosave-chk" checked />
+            <span>Auto-Sync</span>
+          </label>
+
+          <button type="button" id="header-save-btn" class="btn btn--gold btn--sm" title="Save &amp; Sync dirty cells to Google Sheets">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
+              <path d="M3 3v5h5"></path>
+              <path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"></path>
+              <path d="M16 16h5v5"></path>
+            </svg>
+            <span id="header-save-label">Save &amp; Sync</span>
+          </button>
+
+          <button type="button" id="refresh-btn" class="icon-action-btn" title="Pull latest figures from Google Sheets" aria-label="Refresh from Google Sheets">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <polyline points="23 4 23 10 17 10"></polyline>
+              <polyline points="1 20 1 14 7 14"></polyline>
+              <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+            </svg>
+          </button>
+
+          <button type="button" id="install-app-btn" class="icon-action-btn" title="Install LFC ADMIN App on Phone" aria-label="Install App on Phone">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect>
+              <line x1="12" y1="18" x2="12.01" y2="18"></line>
+            </svg>
+            <span class="hide-mobile">Install App</span>
+          </button>
+
+          <button type="button" id="print-btn" class="icon-action-btn hide-xs" title="Print Friday Meeting Summary" aria-label="Print Friday Meeting Summary">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <polyline points="6 9 6 2 18 2 18 9"></polyline>
+              <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+              <rect x="6" y="14" width="12" height="8"></rect>
+            </svg>
+            <span class="hide-tablet">Print</span>
+          </button>
+
+          <button type="button" id="open-sheet-btn" class="icon-action-btn hide-xs" title="Open Google Sheet in Drive" aria-label="Open Google Sheet">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+              <polyline points="15 3 21 3 21 9"></polyline>
+              <line x1="10" y1="14" x2="21" y2="3"></line>
+            </svg>
+          </button>
+
+          <button type="button" id="lock-btn" class="icon-action-btn icon-action-btn--crimson" title="Lock &amp; Sign Out" aria-label="Lock and Sign Out">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+              <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+            </svg>
+            <span class="hide-mobile">Lock</span>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Print-Only Executive Header -->
+    <section class="print-only print-banner">
+      <div class="print-banner__left">
+        <h1>LIFE FELLOWSHIP CHURCH — WEEKLY CASH POSITION</h1>
+        <p id="print-subtitle">Friday Treasurer Review &bull; 1420 Courtland Blvd, Deltona, FL 32738</p>
+      </div>
+      <div class="print-banner__right" id="print-meta"></div>
+    </section>
+
+    <!-- At-A-Glance Sticky KPI Strip -->
+    <section class="kpi-strip" aria-label="At-A-Glance Cash Position">
+      <div class="container kpi-strip__grid">
+        <div class="kpi-item kpi-item--status">
+          <span class="kpi-label">OVERALL STATUS</span>
+          <span id="kpi-status-badge" class="status-pill status-pill--clear">&#10004; ALL CLEAR</span>
+        </div>
+        <div class="kpi-item">
+          <span class="kpi-label">CASH IN BANK</span>
+          <strong id="kpi-cash-bank" class="kpi-value">$0.00</strong>
+        </div>
+        <div class="kpi-item">
+          <span class="kpi-label">PENDING DEPOSITS</span>
+          <strong id="kpi-pending" class="kpi-value kpi-value--gold">$0.00</strong>
+        </div>
+        <div class="kpi-item">
+          <span class="kpi-label">DUE NEXT 5 DAYS</span>
+          <strong id="kpi-due-5d" class="kpi-value">$0.00</strong>
+        </div>
+        <div class="kpi-item kpi-item--projected">
+          <span class="kpi-label">PROJECTED CASH</span>
+          <strong id="kpi-projected" class="kpi-value kpi-value--emerald">$0.00</strong>
+        </div>
+      </div>
+    </section>
+
+    <!-- Main Dashboard Content -->
+    <main class="dashboard-main container">
+      <!-- Week Selector & Meeting Header Card -->
+      <section class="panel week-header-panel" aria-label="Weekly Friday Tab Selector and Meeting Info">
+        <div class="week-selector-bar no-print">
+          <div class="week-selector-bar__left">
+            <label for="week-select" class="eyebrow-label">FRIDAY TAB</label>
+            <select id="week-select" class="select-input week-dropdown" aria-label="Select Friday Meeting Tab"></select>
+            <button type="button" id="prev-week-btn" class="pill-nav-btn" title="Previous Friday" aria-label="Previous Friday">&larr;</button>
+            <button type="button" id="next-week-btn" class="pill-nav-btn" title="Next Friday" aria-label="Next Friday">&rarr;</button>
+          </div>
+
+          <div id="week-pills" class="week-pills-scroll" role="tablist" aria-label="Weekly Friday Tabs"></div>
+
+          <div class="week-selector-bar__right">
+            <button type="button" id="new-friday-tab-btn" class="btn btn--outline btn--xs">
+              + New Friday Tab
+            </button>
+          </div>
+        </div>
+
+        <div class="meeting-meta-grid">
+          <div class="meta-box meta-box--readonly">
+            <span class="meta-box__label">MEETING DATE (FRIDAY) <span class="formula-tag">SHEET C6</span></span>
+            <strong id="meta-meeting-date" class="meta-box__value">&mdash;</strong>
+          </div>
+
+          <div class="meta-box meta-box--readonly">
+            <span class="meta-box__label">5-DAY LOOK-AHEAD WINDOW <span class="formula-tag">FORMULA C7</span></span>
+            <strong id="meta-lookahead" class="meta-box__value">&mdash;</strong>
+          </div>
+
+          <div class="meta-box meta-box--editable">
+            <label for="input-treasurer" class="meta-box__label">TREASURER <span class="editable-tag">EDIT F6</span></label>
+            <input
+              type="text"
+              id="input-treasurer"
+              data-cell="F6"
+              class="sheet-input"
+              placeholder="e.g., Dee (Huney) Huchton"
+            />
+          </div>
+
+          <div class="meta-box meta-box--editable">
+            <label for="input-prepared-by" class="meta-box__label">PREPARED BY <span class="editable-tag">EDIT F7</span></label>
+            <input
+              type="text"
+              id="input-prepared-by"
+              data-cell="F7"
+              class="sheet-input"
+              placeholder="e.g., Joel Newman"
+            />
+          </div>
+        </div>
+
+        <div class="cell-legend no-print">
+          <span class="legend-chip legend-chip--edit">
+            <span class="legend-dot legend-dot--gold"></span>
+            Gold-accented inputs = Editable Google Sheet cells
+          </span>
+          <span class="legend-chip legend-chip--calc">
+            <span class="legend-dot legend-dot--lock"></span>
+            Formula cells calculate automatically &amp; are never overwritten
+          </span>
+        </div>
+      </section>
+
+      <!-- Executive 2-Column Row: Section 1 (Cash in Bank) + Section 2 (Money on the Way In) -->
+      <div class="exec-two-col">
+        <!-- SECTION 1: CASH IN THE BANK -->
+        <section class="panel" aria-labelledby="sec1-heading">
+          <div class="panel__header">
+            <div>
+              <span class="section-num">SECTION 1</span>
+              <h2 id="sec1-heading" class="panel__title">CASH IN THE BANK</h2>
+              <p class="panel__desc">Current checking, school, and reserve balances right now</p>
+            </div>
+          </div>
+
+          <div id="sec1-rows" class="line-items-stack"></div>
+
+          <div class="panel__total-bar">
+            <div class="total-bar__label">
+              <span>TOTAL CASH IN BANK</span>
+              <span class="formula-tag">=SUM(C15:C17)</span>
+            </div>
+            <strong id="sec1-total" class="total-bar__amount">$0.00</strong>
+          </div>
+        </section>
+
+        <!-- SECTION 2: MONEY ON THE WAY IN -->
+        <section class="panel" aria-labelledby="sec2-heading">
+          <div class="panel__header">
+            <div>
+              <span class="section-num">SECTION 2</span>
+              <h2 id="sec2-heading" class="panel__title">MONEY ON THE WAY IN</h2>
+              <p class="panel__desc">Stripe payouts &amp; undeposited cash/checks awaiting bank credit</p>
+            </div>
+          </div>
+
+          <div id="sec2-rows" class="line-items-stack"></div>
+
+          <div class="panel__total-bar">
+            <div class="total-bar__label">
+              <span>TOTAL PENDING DEPOSITS</span>
+              <span class="formula-tag">=SUM(C22:C25)</span>
+            </div>
+            <strong id="sec2-total" class="total-bar__amount total-bar__amount--gold">$0.00</strong>
+          </div>
+        </section>
+      </div>
+
+      <!-- SECTION 3: BILLS & PAYROLL DUE IN NEXT 5 DAYS -->
+      <section class="panel" aria-labelledby="sec3-heading">
+        <div class="panel__header">
+          <div>
+            <span class="section-num">SECTION 3</span>
+            <h2 id="sec3-heading" class="panel__title">BILLS &amp; PAYROLL DUE IN NEXT 5 DAYS</h2>
+            <p class="panel__desc">Upcoming obligations split cleanly between General Operating &amp; School Operating</p>
+          </div>
+        </div>
+
+        <div class="bills-table-head hide-mobile-cards" aria-hidden="true">
+          <span>ITEM</span>
+          <span>AMOUNT</span>
+          <span>PAID FROM</span>
+          <span>DUE DATE</span>
+          <span>NOTES</span>
+        </div>
+        <div id="sec3-rows" class="bills-list"></div>
+
+        <div class="sec3-totals-grid">
+          <div class="sub-total-card sub-total-card--primary">
+            <span class="sub-total-card__label">TOTAL DUE IN NEXT 5 DAYS <span class="formula-tag">C38</span></span>
+            <strong id="sec3-total-due" class="sub-total-card__val">$0.00</strong>
+          </div>
+          <div class="sub-total-card">
+            <span class="sub-total-card__label">PAID FROM GENERAL OPERATING <span class="formula-tag">C39</span></span>
+            <strong id="sec3-paid-general" class="sub-total-card__val">$0.00</strong>
+          </div>
+          <div class="sub-total-card">
+            <span class="sub-total-card__label">PAID FROM SCHOOL OPERATING <span class="formula-tag">C40</span></span>
+            <strong id="sec3-paid-school" class="sub-total-card__val">$0.00</strong>
+          </div>
+        </div>
+      </section>
+
+      <!-- SECTION 4: CASH POSITION SUMMARY (READ-ONLY FORMULA MATRIX + EDITABLE CUSHION) -->
+      <section class="panel" aria-labelledby="sec4-heading">
+        <div class="panel__header">
+          <div>
+            <span class="section-num">SECTION 4 &bull; AUTO-CALCULATED MATRIX</span>
+            <h2 id="sec4-heading" class="panel__title">CASH POSITION SUMMARY (AFTER 5 DAYS)</h2>
+            <p id="sec4-tip" class="panel__desc">Tip: set the cushion to the minimum balance you want to keep in each account.</p>
+          </div>
+        </div>
+
+        <!-- Desktop Matrix Table -->
+        <div class="matrix-desktop-wrap">
+          <table class="summary-matrix" aria-label="Cash Position Summary Matrix">
+            <thead>
+              <tr>
+                <th scope="col">POSITION METRIC</th>
+                <th scope="col" class="num-col">GENERAL OPERATING</th>
+                <th scope="col" class="num-col">SCHOOL OPERATING</th>
+                <th scope="col" class="num-col">OTHER ACCOUNTS</th>
+                <th scope="col" class="num-col total-col">TOTAL</th>
+              </tr>
+            </thead>
+            <tbody id="sec4-matrix-body"></tbody>
+          </table>
+        </div>
+
+        <!-- Mobile Stacked Account Cards (0px horizontal overflow on 390px screens) -->
+        <div id="sec4-mobile-cards" class="matrix-mobile-cards"></div>
+      </section>
+
+      <!-- Executive 2-Column Row: Section 5 (Weekly Checklist) + Section 6 (Action Items & Notes) -->
+      <div class="exec-two-col exec-two-col--bottom">
+        <!-- SECTION 5: WEEKLY CHECKLIST -->
+        <section class="panel" aria-labelledby="sec5-heading">
+          <div class="panel__header">
+            <div class="panel__header-split">
+              <div>
+                <span class="section-num">SECTION 5</span>
+                <h2 id="sec5-heading" class="panel__title">WEEKLY CHECKLIST</h2>
+                <p class="panel__desc">One-tap toggle switches (<code>Done</code> / <code>FALSE</code>) for all 10 Friday tasks</p>
+              </div>
+              <div class="checklist-badge-wrap">
+                <span id="sec5-status-pill" class="status-pill status-pill--warn">10 open</span>
+              </div>
+            </div>
+
+            <div class="progress-wrap" aria-label="Weekly Checklist Completion Progress">
+              <div class="progress-bar-track">
+                <div id="sec5-progress-fill" class="progress-bar-fill" style="width: 0%"></div>
+              </div>
+              <div class="progress-meta">
+                <span id="sec5-progress-label">0 of 10 complete (0%)</span>
+                <span id="sec5-sheet-note" class="muted-small"></span>
+              </div>
+            </div>
+          </div>
+
+          <div id="sec5-rows" class="checklist-stack"></div>
+        </section>
+
+        <!-- SECTION 6: ACTION ITEMS & DISCUSSION NOTES -->
+        <section class="panel" aria-labelledby="sec6-heading">
+          <div class="panel__header">
+            <div>
+              <span class="section-num">SECTION 6</span>
+              <h2 id="sec6-heading" class="panel__title">ACTION ITEMS &amp; DISCUSSION NOTES</h2>
+              <p class="panel__desc">Follow-up ownership, target dates, and Friday meeting minutes</p>
+            </div>
+          </div>
+
+          <div class="action-items-head hide-mobile-cards" aria-hidden="true">
+            <span>ACTION ITEM</span>
+            <span>OWNER</span>
+            <span>DUE</span>
+            <span>NOTES</span>
+          </div>
+          <div id="sec6-actions" class="action-items-stack"></div>
+
+          <div class="discussion-block">
+            <label for="input-discussion-notes" class="field-label">
+              FREEFORM DISCUSSION NOTES <span class="editable-tag">EDIT B76</span>
+            </label>
+            <textarea
+              id="input-discussion-notes"
+              data-cell="B76"
+              rows="5"
+              class="sheet-textarea"
+              placeholder="Record pastoral &amp; treasurer discussion notes, offerings follow-up, or board items..."
+            ></textarea>
+          </div>
+
+          <div class="panel__footer-cta no-print">
+            <button type="button" id="footer-save-btn" class="btn btn--gold btn--full">
+              Save &amp; Sync to Google Sheet
+            </button>
+          </div>
+        </section>
+      </div>
+    </main>
+
+    <!-- Sticky Bottom Unsaved Changes Bar (Appears when dirty edits are pending) -->
+    <div id="unsaved-bar" class="unsaved-bar no-print" hidden>
+      <div class="unsaved-bar__inner">
+        <span id="unsaved-count-text" class="unsaved-bar__text">1 unsaved edit</span>
+        <div class="unsaved-bar__btns">
+          <button type="button" id="discard-btn" class="btn btn--ghost btn--xs">Discard</button>
+          <button type="button" id="bar-save-btn" class="btn btn--gold btn--xs">Save &amp; Sync Now</button>
+        </div>
+      </div>
+    </div>
+
+    <footer class="app-footer no-print">
+      <div class="container app-footer__inner">
+        <span>&copy; 2026 Life Fellowship Church &bull; 1420 Courtland Blvd, Deltona, FL</span>
+        <div class="app-footer__links">
+          <button type="button" id="footer-install-btn" class="link-btn">Install Phone App</button>
+          <span>&bull;</span>
+          <button type="button" id="footer-print-btn" class="link-btn">Print Summary</button>
+          <span>&bull;</span>
+          <a href="https://deltonanaz.com" class="link-btn">deltonanaz.com</a>
+        </div>
+      </div>
+    </footer>
+  </div>
+
+  <!-- ========================================================================
+       3. INSTALL APP ON PHONE MODAL (Android One-Tap + iPhone Safari Guide)
+       ======================================================================== -->
+  <div id="install-modal" class="modal-backdrop no-print" hidden aria-hidden="true">
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="install-modal-title">
+      <div class="modal-card__header">
+        <div class="modal-brand">
+          <img src="./icons/icon-192.png" alt="LFC ADMIN App Icon" width="44" height="44" class="modal-app-icon" />
+          <div>
+            <span class="eyebrow-badge">STANDALONE PHONE APP</span>
+            <h2 id="install-modal-title" class="modal-title">INSTALL LFC ADMIN</h2>
+          </div>
+        </div>
+        <button type="button" class="modal-close-btn" data-close-modal="install-modal" aria-label="Close modal">&#10005;</button>
+      </div>
+
+      <div class="modal-card__body">
+        <div id="native-install-banner" class="install-box install-box--gold" hidden>
+          <h3>One-Tap Install Ready</h3>
+          <p>Install LFC ADMIN directly to your home screen for full-screen standalone launch.</p>
+          <button type="button" id="trigger-native-install-btn" class="btn btn--gold btn--full">Install LFC ADMIN Now</button>
+        </div>
+
+        <div class="install-grid">
+          <div class="install-step-card">
+            <span class="step-tag">iPHONE &amp; iPAD (SAFARI)</span>
+            <ol class="step-list">
+              <li>Open this page in <strong>Safari</strong> on your iPhone.</li>
+              <li>Tap the <strong>Share</strong> icon <span class="inline-chip">&#8593;</span> at the bottom of Safari.</li>
+              <li>Scroll down and tap <strong>Add to Home Screen</strong>.</li>
+              <li>Tap <strong>Add</strong> — launches full-screen with the LFC 3D Shield icon.</li>
+            </ol>
+          </div>
+
+          <div class="install-step-card">
+            <span class="step-tag">ANDROID (CHROME)</span>
+            <ol class="step-list">
+              <li>Open this page in <strong>Chrome</strong> on your Android phone.</li>
+              <li>Tap the <strong>&#8942; Menu</strong> icon in the top-right corner.</li>
+              <li>Tap <strong>Install app</strong> or <strong>Add to Home screen</strong>.</li>
+              <li>Confirm <strong>Install</strong> to add LFC ADMIN to your app drawer.</li>
+            </ol>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================================
+       4. DUPLICATE / NEW FRIDAY TAB MODAL
+       ======================================================================== -->
+  <div id="new-tab-modal" class="modal-backdrop no-print" hidden aria-hidden="true">
+    <div class="modal-card modal-card--sm" role="dialog" aria-modal="true" aria-labelledby="new-tab-title">
+      <div class="modal-card__header">
+        <div>
+          <span class="eyebrow-badge">GOOGLE SHEETS SYNC</span>
+          <h2 id="new-tab-title" class="modal-title">NEW FRIDAY TAB</h2>
+        </div>
+        <button type="button" class="modal-close-btn" data-close-modal="new-tab-modal" aria-label="Close modal">&#10005;</button>
+      </div>
+      <form id="new-tab-form" class="modal-card__body">
+        <p class="helper-copy">
+          Clones the latest Friday template in Google Sheets, links <code>C6</code> (+7 days), carries forward minimum cash cushions (<code>C48:E48</code>) and prior-week projected cash (<code>C50:E50</code>), and clears weekly inputs.
+        </p>
+        <label for="new-tab-name-input" class="field-label">NEW TAB NAME (OPTIONAL — AUTO-COMPUTES NEXT FRIDAY)</label>
+        <input type="text" id="new-tab-name-input" class="text-input" placeholder="e.g., Mar 5" />
+        <div class="modal-actions">
+          <button type="button" class="btn btn--ghost" data-close-modal="new-tab-modal">Cancel</button>
+          <button type="submit" id="confirm-new-tab-btn" class="btn btn--gold">Create Friday Tab</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Live Confirmation & Error Toast Container -->
+  <div id="toast-region" class="toast-region no-print" aria-live="polite" aria-atomic="true"></div>
+
+  <script src="./js/config.js"></script>
+  <script src="./js/calc-engine.js"></script>
+  <script src="./js/app.js"></script>
+</body>
+</html>
