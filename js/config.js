@@ -74,6 +74,12 @@ window.LFC_CHMS_CONFIG = {
       defaultModules: ['dashboard', 'reports', 'schedules_my'],
       defaultScopes: ['Church Board']
     },
+    ministry_director: {
+      label: "Children's, SHIELD & SCA Director (April Newman)",
+      badge: 'MINISTRY DIRECTOR',
+      defaultModules: ['dashboard', 'attendance', 'visitors', 'schedules', 'reports'],
+      defaultScopes: ['Children', 'SHIELD Ministry', 'SHIELD Christian Academy', 'Sunday School']
+    },
     worship_leader: {
       label: 'Worship Leader & Area Head (Wayne Crev)',
       badge: 'WORSHIP HEAD',
@@ -102,6 +108,7 @@ window.LFC_CHMS_CONFIG = {
 
   pilotTesters: [
     { key: 'joel', username: 'PastorJoel', fullName: 'Pastor Joel Newman', role: 'super_admin', scopes: ['*'], area: 'Lead Pastor • Full System & Pilot Feedback' },
+    { key: 'april', username: 'april.newman', fullName: 'April Newman', role: 'ministry_director', scopes: ['Children', 'SHIELD Ministry', 'SHIELD Christian Academy', 'Sunday School'], area: "Children's, SHIELD & SCA Director • Kids/SHIELD, Visitors, Schedules & Reports" },
     { key: 'yaresly', username: 'yaresly.godwin', fullName: 'Yaresly Godwin', role: 'super_admin', scopes: ['*'], area: 'Church Board Secretary • Full Super Admin' },
     { key: 'huney', username: 'huney.treasurer', fullName: 'Dee "Huney" Huchton', role: 'treasurer', scopes: ['All Financial'], area: 'Church Treasurer • Accounting, AP & Friday Cash' },
     { key: 'wayne', username: 'wayne.worship', fullName: 'Wayne Crev', role: 'worship_leader', scopes: ['Sunday Worship', 'Audio Visual'], area: 'Worship Leader & Area Head • Outlines, Songs & AV' },
@@ -113,8 +120,9 @@ window.LFC_CHMS_CONFIG = {
     'Sunday Worship',
     'Children',
     'Sunday School',
-    'Celebrate Recovery',
     'SHIELD Ministry',
+    'SHIELD Christian Academy',
+    'Celebrate Recovery',
     'Audio Visual',
     'Church Board'
   ],

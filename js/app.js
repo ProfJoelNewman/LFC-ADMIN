@@ -68,6 +68,7 @@
       pilotFeedback: [],
       users: [
         { userId: 'usr_joel', username: 'PastorJoel', fullName: 'Pastor Joel Newman', email: 'pastor@deltonanaz.com', phone: '(386) 574-7828', role: 'super_admin', allowedModules: '*', ministryScopes: '*', active: true },
+        { userId: 'usr_april', username: 'april.newman', fullName: "April Newman (Children's, SHIELD & SCA)", email: 'shield@deltonanaz.com', phone: '', role: 'ministry_director', allowedModules: 'dashboard,attendance,visitors,schedules,reports', ministryScopes: 'Children, SHIELD Ministry, SHIELD Christian Academy, Sunday School', active: true },
         { userId: 'usr_yaresly', username: 'yaresly.godwin', fullName: 'Yaresly Godwin (Board Secretary)', email: 'boardsecretary@deltonanaz.com', phone: '', role: 'super_admin', allowedModules: '*', ministryScopes: '*', active: true },
         { userId: 'usr_huney', username: 'huney.treasurer', fullName: 'Dee "Huney" Huchton (Treasurer)', email: 'treasurer@deltonanaz.com', phone: '', role: 'treasurer', allowedModules: 'dashboard,giving,accounting,friday,reports', ministryScopes: 'All Financial', active: true },
         { userId: 'usr_wayne', username: 'wayne.worship', fullName: 'Wayne Crev (Worship Head)', email: 'worship@deltonanaz.com', phone: '', role: 'worship_leader', allowedModules: 'dashboard,worship,worship_stage,events,schedules', ministryScopes: 'Sunday Worship,Audio Visual', active: true },
@@ -77,6 +78,7 @@
       ],
       people: [
         { Person_ID: 'p_joel', First_Name: 'Joel', Last_Name: 'Newman', Member_Status: 'Voting Member', Active_Roll: 'Yes', Age_Category: 'Adults', Mobile_Phone: '(386) 574-7828', Email: 'pastor@deltonanaz.com', Role_Note: 'Lead Pastor' },
+        { Person_ID: 'p_april', First_Name: 'April', Last_Name: 'Newman', Member_Status: 'Voting Member', Active_Roll: 'Yes', Age_Category: 'Adults', Mobile_Phone: '', Email: '', Role_Note: "Children's, SHIELD Ministry & SCA Director" },
         { Person_ID: 'p_yaresly', First_Name: 'Yaresly', Last_Name: 'Godwin', Member_Status: 'Voting Member', Active_Roll: 'Yes', Age_Category: 'Adults', Mobile_Phone: '', Email: '', Role_Note: 'Church Board Secretary' },
         { Person_ID: 'p_huney', First_Name: 'Dee "Huney"', Last_Name: 'Huchton', Member_Status: 'Voting Member', Active_Roll: 'Yes', Age_Category: 'Adults', Mobile_Phone: '', Email: '', Role_Note: 'Church Treasurer' },
         { Person_ID: 'p_wayne', First_Name: 'Wayne', Last_Name: 'Crev', Member_Status: 'Voting Member', Active_Roll: 'Yes', Age_Category: 'Adults', Mobile_Phone: '', Email: '', Role_Note: 'Worship Leader & Area Head' },
@@ -174,6 +176,7 @@
         { Assignment_ID: 'asg_01', Event_Date: '2026-11-29', Event_Title: 'First Sunday of Advent Worship', Helper_Username: 'wayne.worship', Helper_Name: 'Wayne Crev', Role_Title: 'Worship Leader & Area Head', RSVP_Status: 'Accepted', RSVP_Token: 'tok_wayne_1129' },
         { Assignment_ID: 'asg_02', Event_Date: '2026-11-29', Event_Title: 'First Sunday of Advent Worship', Helper_Username: 'leandra.worship', Helper_Name: 'Leandra Crevoiserat', Role_Title: 'Vocalist', RSVP_Status: 'Accepted', RSVP_Token: 'tok_leandra_1129' },
         { Assignment_ID: 'asg_03', Event_Date: '2026-11-29', Event_Title: 'First Sunday of Advent Worship', Helper_Username: 'lawton.av', Helper_Name: 'Lawton Stacey', Role_Title: 'Graphics / Stream Operator', RSVP_Status: 'Invited', RSVP_Token: 'tok_lawton_1129' },
+        { Assignment_ID: 'asg_07', Event_Date: '2026-11-29', Event_Title: "SHIELD Kids, Youth & SCA Oversight", Helper_Username: 'april.newman', Helper_Name: 'April Newman', Role_Title: "Children's, SHIELD & SCA Director", RSVP_Status: 'Accepted', RSVP_Token: 'tok_april_1129' },
         { Assignment_ID: 'asg_04', Event_Date: '2026-11-29', Event_Title: "Children's Ministry Check-In", Helper_Username: 'sarah.kids', Helper_Name: 'Sarah Gulick', Role_Title: "Children's Helper", RSVP_Status: 'Accepted', RSVP_Token: 'tok_sarah_1129' },
         { Assignment_ID: 'asg_05', Event_Date: '2026-12-08', Event_Title: 'Monthly Church Board Meeting', Helper_Username: 'patricia.board', Helper_Name: 'Patricia Babb', Role_Title: 'Church Board Member', RSVP_Status: 'Accepted', RSVP_Token: 'tok_patricia_1208' },
         { Assignment_ID: 'asg_06', Event_Date: '2026-12-08', Event_Title: 'Monthly Church Board Meeting', Helper_Username: 'yaresly.godwin', Helper_Name: 'Yaresly Godwin', Role_Title: 'Church Board Secretary', RSVP_Status: 'Accepted', RSVP_Token: 'tok_yaresly_1208' }
@@ -483,6 +486,14 @@
         { id: 'schedules_my', label: 'Board Dates', icon: ICONS.calendar }
       ];
     }
+    if (role === 'ministry_director') {
+      return [
+        { id: 'home', label: 'Today', icon: ICONS.home },
+        { id: 'ministry', label: 'Kids/SHIELD', icon: ICONS.attendance },
+        { id: 'schedules', label: 'Schedules', icon: ICONS.calendar },
+        { id: 'reports', label: 'Reports', icon: ICONS.reports }
+      ];
+    }
     if (role === 'offering_counter') {
       return [
         { id: 'home', label: 'Today', icon: ICONS.home },
@@ -633,6 +644,11 @@
       heroDesc = 'Review live Month-End & Nazarene APR Attendance, Visitor Growth, Aggregate Stewardship, and Fund Health (donor PII kept confidential).';
       heroBtnLabel = 'View Upcoming Board Dates';
       heroTargetTab = 'schedules_my';
+    } else if (role === 'ministry_director') {
+      heroTitle = "Children's, SHIELD & SCA Hub — April Newman";
+      heroDesc = 'Manage Kids Security Check-In, SHIELD Ministry & SCA Attendance, Visitor Cards & Follow-Up, Helper Schedules, and Month-End Attendance Reports.';
+      heroBtnLabel = 'Open Kids, SHIELD & Visitor Check-In';
+      heroTargetTab = 'ministry';
     } else if (role === 'offering_counter') {
       heroTitle = 'Sunday Offering Count Ready';
       heroDesc = 'Enter cash/check envelopes, snap a photo of the signed Count Sheet, and lock batch when balanced.';
@@ -661,7 +677,7 @@
       esc(heroBtnLabel) + ' &rarr;</button>' +
       '</section>';
 
-    if (role === 'super_admin' || role === 'treasurer' || role === 'board_member') {
+    if (role === 'super_admin' || role === 'treasurer' || role === 'board_member' || role === 'ministry_director') {
       html += renderReportsView();
     } else {
       html +=
@@ -698,6 +714,35 @@
     const role = (state.user && state.user.role) || '';
     const isSuper = role === 'super_admin';
     const isTreas = role === 'treasurer';
+    const isMinDir = role === 'ministry_director';
+
+    if (isMinDir) {
+      return (
+        '<section class="card">' +
+        '<div class="card-head">' +
+        '<div>' +
+        '<h2 class="card-title">Children\'s, SHIELD &amp; Visitor Month-End / APR Rollups</h2>' +
+        '<p class="card-subtitle">Self-calculated Attendance &amp; Visitor Growth from Google Drive Vault (no church banking)</p>' +
+        '</div>' +
+        '<select id="report-month-select" class="select" style="width: auto; min-height: 38px; font-size: 13px;">' +
+        '<option value="2026-11" ' + (state.reportMonth === '2026-11' ? 'selected' : '') + '>November 2026</option>' +
+        '<option value="2026-10" ' + (state.reportMonth === '2026-10' ? 'selected' : '') + '>October 2026</option>' +
+        '<option value="APR" ' + (state.reportMonth === 'APR' ? 'selected' : '') + '>2026-2027 Nazarene APR</option>' +
+        '</select>' +
+        '</div>' +
+        '<div class="kpi-grid">' +
+        '<div class="kpi-tile"><span class="kpi-tile__label">Avg Sunday Worship</span><div class="kpi-tile__val kpi-tile__val--gold">' + m.avgCombinedWorship + '</div><span class="kpi-tile__meta">' + m.avgAdults + ' Adults + ' + m.avgKids + ' Kids (' + m.sundaysRecorded + ' Sun)</span></div>' +
+        '<div class="kpi-tile"><span class="kpi-tile__label">Children\'s Worship Avg</span><div class="kpi-tile__val kpi-tile__val--emerald">' + m.avgKids + '</div><span class="kpi-tile__meta">Sunday Nursery &amp; Kids</span></div>' +
+        '<div class="kpi-tile"><span class="kpi-tile__label">SHIELD &amp; Sunday School</span><div class="kpi-tile__val">SHIELD ' + m.avgShield + '</div><span class="kpi-tile__meta">Sunday School Avg: ' + m.avgSundaySchool + '</span></div>' +
+        '<div class="kpi-tile"><span class="kpi-tile__label">New 1st-Time Visitors</span><div class="kpi-tile__val">' + m.firstTimeVis + '</div><span class="kpi-tile__meta">' + m.secondTimeVis + ' Return &bull; ' + m.followUpPct + '% F-Up Done</span></div>' +
+        '</div>' +
+        '<div style="margin-top: 12px;" class="kpi-grid">' +
+        '<div class="kpi-tile"><span class="kpi-tile__label">Spiritual Decisions</span><div class="kpi-tile__val kpi-tile__val--gold">' + m.professions + '</div><span class="kpi-tile__meta">APR Evangelism Rollup</span></div>' +
+        '<div class="kpi-tile"><span class="kpi-tile__label">48-Hr Visitor Care</span><div class="kpi-tile__val kpi-tile__val--emerald">' + m.followUpPct + '%</div><span class="kpi-tile__meta">Follow-Ups Completed</span></div>' +
+        '</div>' +
+        '</section>'
+      );
+    }
 
     return (
       '<section class="card">' +
@@ -814,16 +859,23 @@
         '</section>';
     } else if (curSub === 'roster') {
       const checkedCount = Object.values(state.attRosterChecked).filter(Boolean).length;
+      const isMinDir = state.user && state.user.role === 'ministry_director';
       const rosterPool = isKidsOnly
         ? state.data.people.filter(p => p.Member_Status === 'Child')
         : state.data.people;
       html +=
         '<section class="card">' +
-        '<div class="card-head"><div><h1 class="card-title">' + (isKidsOnly ? "Children's Security Check-In &amp; Attendance" : 'Group Roster &amp; Child Security Check-In') + '</h1><p class="card-subtitle">Tap names to mark Present; Children receive a 4-digit parent pickup code</p></div>' +
+        '<div class="card-head"><div><h1 class="card-title">' + (isKidsOnly ? "Children's Security Check-In &amp; Attendance" : isMinDir ? "Children's, SHIELD &amp; SCA Check-In" : 'Group Roster &amp; Child Security Check-In') + '</h1><p class="card-subtitle">Tap names to mark Present; Children receive a 4-digit parent pickup code</p></div>' +
         '<select id="roster-group-select" class="select" style="width:auto; min-height:38px;">' +
         (isKidsOnly
           ? '<option value="Sunday Worship - Children">Children\'s Worship &amp; Nursery (10:30 AM)</option>' +
             '<option value="LFC Kids Club">LFC Kids Club (Wed 6:00 PM)</option>'
+          : isMinDir
+          ? '<option value="Sunday Worship - Children">Children\'s Worship &amp; Nursery (10:30 AM)</option>' +
+            '<option value="SHIELD Ministry">SHIELD Kids &amp; Youth (Wed 6:00 PM)</option>' +
+            '<option value="SHIELD Christian Academy">SHIELD Christian Academy (SCA)</option>' +
+            '<option value="LFC Kids Club">LFC Kids Club (Wed 6:00 PM)</option>' +
+            '<option value="Sunday School">Sunday School (9:30 AM)</option>'
           : '<option value="Sunday Worship - Children">Children\'s Worship &amp; Nursery (10:30 AM)</option>' +
             '<option value="Sunday School">Sunday School (9:30 AM)</option>' +
             '<option value="Celebrate Recovery">Celebrate Recovery (Wed 7:00 PM)</option>' +
@@ -1212,6 +1264,7 @@
       '<div class="field"><label class="field-label" for="prov-password">Temporary Password (8+ chars)</label><input id="prov-password" class="input" value="LFC-Helper-2026!" minlength="8" required /></div>' +
       '<div class="field"><label class="field-label" for="prov-role">Role Preset</label><select id="prov-role" class="select">' +
       '<option value="ministry_helper">Ministry Helper (Scoped)</option>' +
+      '<option value="ministry_director">Children\'s, SHIELD &amp; SCA Director (No Banking)</option>' +
       '<option value="board_member">Church Board Member (Reports Only)</option>' +
       '<option value="worship_team">Worship / AV Team Member</option>' +
       '<option value="worship_leader">Worship Leader &amp; Area Head</option>' +
