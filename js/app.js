@@ -48,12 +48,14 @@
     selectedBatchId: 'bat_1120_stripe',
     pendingPhotoBase64: '',
     pendingPhotoName: '',
+    dirQuery: '',
+    dirStatusFilter: 'All',
+    statementDonor: 'Patricia Babb',
     rsvpToken: '',
     rsvpAssignment: null,
     data: createDemoVaultData()
   };
 
-  // Synthetic Simulator Dataset (Mirrors Google Drive Vault structure for offline/role testing)
   function createDemoVaultData() {
     return {
       vaultLinks: {
@@ -63,25 +65,27 @@
         wb03Worship: CFG.vault.workbooks.worship.url,
         wb04Finance: CFG.vault.workbooks.finance.url
       },
+      pilotFeedback: [],
       users: [
-        { userId: 'usr_joel', username: 'PastorJoel', fullName: 'Pastor Joel Newman', email: 'PastorJNewman@outlook.com', phone: '(386) 555-0101', role: 'super_admin', allowedModules: '*', ministryScopes: '*', active: true },
-        { userId: 'usr_marie', username: 'marie.treasurer', fullName: 'Marie (Treasurer / Bookkeeper)', email: 'treasurer@deltonanaz.com', phone: '(386) 555-0110', role: 'treasurer', allowedModules: 'dashboard,giving,accounting,friday,reports', ministryScopes: 'All Financial', active: true },
-        { userId: 'usr_counter', username: 'sunday.counter', fullName: 'Sunday Offering Counter', email: 'counter@deltonanaz.com', phone: '(386) 555-0118', role: 'offering_counter', allowedModules: 'dashboard,giving_batch_entry', ministryScopes: 'Sunday Worship', active: true },
-        { userId: 'usr_wayne', username: 'wayne.worship', fullName: 'Wayne Crevoiserat', email: 'worship@deltonanaz.com', phone: '(386) 555-0114', role: 'worship_leader', allowedModules: 'dashboard,worship,events,schedules', ministryScopes: 'Sunday Worship,Audio Visual', active: true },
-        { userId: 'usr_cameron', username: 'cameron.av', fullName: 'Cameron White', email: 'cameron@deltonanaz.com', phone: '(386) 555-0141', role: 'worship_team', allowedModules: 'dashboard,worship_stage,schedules_my', ministryScopes: 'Sunday Worship,Audio Visual', active: true },
-        { userId: 'usr_patricia', username: 'patricia.cr', fullName: 'Patricia Babb', email: 'patricia.babb@deltonanaz.com', phone: '(386) 555-0122', role: 'ministry_helper', allowedModules: 'dashboard,attendance,visitors,schedules_my', ministryScopes: 'Celebrate Recovery', active: true },
-        { userId: 'usr_sarah', username: 'sarah.kids', fullName: 'Sarah Gulick', email: 'sarah@deltonanaz.com', phone: '(407) 555-0190', role: 'ministry_helper', allowedModules: 'dashboard,attendance,visitors,schedules_my', ministryScopes: 'Children,Sunday School,SHIELD Ministry', active: true }
+        { userId: 'usr_joel', username: 'PastorJoel', fullName: 'Pastor Joel Newman', email: 'pastor@deltonanaz.com', phone: '(386) 574-7828', role: 'super_admin', allowedModules: '*', ministryScopes: '*', active: true },
+        { userId: 'usr_yaresly', username: 'yaresly.godwin', fullName: 'Yaresly Godwin (Board Secretary)', email: 'boardsecretary@deltonanaz.com', phone: '', role: 'super_admin', allowedModules: '*', ministryScopes: '*', active: true },
+        { userId: 'usr_huney', username: 'huney.treasurer', fullName: 'Dee "Huney" Huchton (Treasurer)', email: 'treasurer@deltonanaz.com', phone: '', role: 'treasurer', allowedModules: 'dashboard,giving,accounting,friday,reports', ministryScopes: 'All Financial', active: true },
+        { userId: 'usr_wayne', username: 'wayne.worship', fullName: 'Wayne Crev (Worship Head)', email: 'worship@deltonanaz.com', phone: '', role: 'worship_leader', allowedModules: 'dashboard,worship,worship_stage,events,schedules', ministryScopes: 'Sunday Worship,Audio Visual', active: true },
+        { userId: 'usr_patricia', username: 'patricia.board', fullName: 'Patricia Babb (Church Board)', email: 'board@deltonanaz.com', phone: '', role: 'board_member', allowedModules: 'dashboard,reports,schedules_my', ministryScopes: 'Church Board', active: true },
+        { userId: 'usr_sarah', username: 'sarah.kids', fullName: "Sarah Gulick (Children's Helper)", email: 'kids@deltonanaz.com', phone: '', role: 'ministry_helper', allowedModules: 'dashboard,attendance,schedules_my', ministryScopes: 'Children', active: true },
+        { userId: 'usr_counter', username: 'sunday.counter', fullName: 'Sunday Offering Counter', email: 'counter@deltonanaz.com', phone: '', role: 'offering_counter', allowedModules: 'dashboard,giving_batch_entry', ministryScopes: 'Sunday Worship', active: true }
       ],
       people: [
-        { Person_ID: 'p_joel', First_Name: 'Joel', Last_Name: 'Newman', Member_Status: 'Voting Member', Active_Roll: 'Yes', Age_Category: 'Adults', Mobile_Phone: '(386) 555-0101', Email: 'PastorJNewman@outlook.com', Baptism_Month: '', Membership_Month: '2024-03' },
-        { Person_ID: 'p_april', First_Name: 'April', Last_Name: 'Newman', Member_Status: 'Voting Member', Active_Roll: 'Yes', Age_Category: 'Adults', Mobile_Phone: '(386) 555-0102', Email: 'april@deltonanaz.com', Baptism_Month: '', Membership_Month: '2024-03' },
-        { Person_ID: 'p_danielle', First_Name: 'Danielle', Last_Name: 'Newman', Member_Status: 'Child', Active_Roll: 'Yes', Age_Category: 'Youth', Mobile_Phone: '', Email: '', Baptism_Month: '2026-10', Membership_Month: '' },
-        { Person_ID: 'p_wayne', First_Name: 'Wayne', Last_Name: 'Crevoiserat', Member_Status: 'Voting Member', Active_Roll: 'Yes', Age_Category: 'Adults', Mobile_Phone: '(386) 555-0114', Email: 'worship@deltonanaz.com', Baptism_Month: '', Membership_Month: '2025-05' },
-        { Person_ID: 'p_patricia', First_Name: 'Patricia', Last_Name: 'Babb', Member_Status: 'Voting Member', Active_Roll: 'Yes', Age_Category: 'Adults', Mobile_Phone: '(386) 555-0122', Email: 'patricia.babb@example.com', Baptism_Month: '', Membership_Month: '2025-09' },
-        { Person_ID: 'p_huney', First_Name: 'Dee (Huney)', Last_Name: 'Huchton', Member_Status: 'Voting Member', Active_Roll: 'Yes', Age_Category: 'Adults', Mobile_Phone: '(386) 555-0130', Email: 'huney@example.com', Baptism_Month: '', Membership_Month: '2025-09' },
-        { Person_ID: 'p_sarah', First_Name: 'Sarah', Last_Name: 'Gulick', Member_Status: 'Voting Member', Active_Roll: 'Yes', Age_Category: 'Adults', Mobile_Phone: '(407) 555-0190', Email: 'sarah@example.com', Baptism_Month: '', Membership_Month: '2026-10' },
-        { Person_ID: 'p_dale', First_Name: 'Dale', Last_Name: 'Winters', Member_Status: 'Visitor', Active_Roll: 'Yes', Age_Category: 'Adults', Mobile_Phone: '(386) 555-0178', Email: '', Baptism_Month: '', Membership_Month: '' },
-        { Person_ID: 'p_robert', First_Name: 'Robert', Last_Name: 'Cameron', Member_Status: 'AWOL (Needs F-UP)', Active_Roll: 'No', Age_Category: 'Adults', Mobile_Phone: '(386) 555-0199', Email: 'robert.c@example.com', Baptism_Month: '', Membership_Month: '' }
+        { Person_ID: 'p_joel', First_Name: 'Joel', Last_Name: 'Newman', Member_Status: 'Voting Member', Active_Roll: 'Yes', Age_Category: 'Adults', Mobile_Phone: '(386) 574-7828', Email: 'pastor@deltonanaz.com', Role_Note: 'Lead Pastor' },
+        { Person_ID: 'p_yaresly', First_Name: 'Yaresly', Last_Name: 'Godwin', Member_Status: 'Voting Member', Active_Roll: 'Yes', Age_Category: 'Adults', Mobile_Phone: '', Email: '', Role_Note: 'Church Board Secretary' },
+        { Person_ID: 'p_huney', First_Name: 'Dee "Huney"', Last_Name: 'Huchton', Member_Status: 'Voting Member', Active_Roll: 'Yes', Age_Category: 'Adults', Mobile_Phone: '', Email: '', Role_Note: 'Church Treasurer' },
+        { Person_ID: 'p_wayne', First_Name: 'Wayne', Last_Name: 'Crev', Member_Status: 'Voting Member', Active_Roll: 'Yes', Age_Category: 'Adults', Mobile_Phone: '', Email: '', Role_Note: 'Worship Leader & Area Head' },
+        { Person_ID: 'p_patricia', First_Name: 'Patricia', Last_Name: 'Babb', Member_Status: 'Voting Member', Active_Roll: 'Yes', Age_Category: 'Adults', Mobile_Phone: '', Email: '', Role_Note: 'Church Board Member' },
+        { Person_ID: 'p_sarah', First_Name: 'Sarah', Last_Name: 'Gulick', Member_Status: 'Voting Member', Active_Roll: 'Yes', Age_Category: 'Adults', Mobile_Phone: '', Email: '', Role_Note: "Children's Helper" },
+        { Person_ID: 'p_kid_1', First_Name: 'Lucas', Last_Name: 'Sample-Child', Member_Status: 'Child', Active_Roll: 'Yes', Age_Category: 'Child / Youth', Mobile_Phone: '(386) 555-0141', Email: '', Role_Note: 'Kids Worship Check-In Demo' },
+        { Person_ID: 'p_kid_2', First_Name: 'Hannah', Last_Name: 'Sample-Child', Member_Status: 'Child', Active_Roll: 'Yes', Age_Category: 'Child / Youth', Mobile_Phone: '(386) 555-0142', Email: '', Role_Note: 'LFC Kids Club Demo' },
+        { Person_ID: 'p_vis_1', First_Name: 'Jordan', Last_Name: 'Sample-Guest', Member_Status: 'Visitor', Active_Roll: 'Yes', Age_Category: 'Adults', Mobile_Phone: '(386) 555-0151', Email: '', Role_Note: 'Sunday Visitor Demo' },
+        { Person_ID: 'p_fup_1', First_Name: 'Taylor', Last_Name: 'Sample-Care', Member_Status: 'AWOL (Needs F-UP)', Active_Roll: 'No', Age_Category: 'Adults', Mobile_Phone: '(386) 555-0152', Email: '', Role_Note: 'Pastoral Follow-Up Demo' }
       ],
       visitors: [
         { Submission_ID: 'vis_01', Month_Key: '2026-10', Visit_Date: '2026-10-18', Full_Name: 'Marcus & Elena Rivera', Phone: '(386) 555-0162', Guest_Status: '1st Time Visitor', Ministry_Source: 'Sunday Worship', Decision_Today: 'Profession of Faith', Prayer_Request: 'New job in Volusia County', Follow_Up_Status: 'Completed', Card_Scan_Drive_URL: '' },
@@ -157,22 +161,22 @@
         }
       ],
       outlines: [
-        { Item_ID: 'out_01', Event_ID: 'ev_sun_20261122', Sort_Order: 1, Item_Type: 'element', Song_ID: '', Title: '5-Minute Sacred Gold Countdown', Selected_Key: '', Duration_Sec: 300, Led_By: 'Cameron White (AV)' },
-        { Item_ID: 'out_02', Event_ID: 'ev_sun_20261122', Sort_Order: 2, Item_Type: 'element', Song_ID: '', Title: 'Welcome & Call to Worship', Selected_Key: '', Duration_Sec: 300, Led_By: 'Wayne Crevoiserat' },
-        { Item_ID: 'out_03', Event_ID: 'ev_sun_20261122', Sort_Order: 3, Item_Type: 'song', Song_ID: 'sng_firm', Title: "Firm Foundation (He Won't)", Selected_Key: 'G', Duration_Sec: 330, Led_By: 'Worship Team' },
-        { Item_ID: 'out_04', Event_ID: 'ev_sun_20261122', Sort_Order: 4, Item_Type: 'song', Song_ID: 'sng_death', Title: 'Death Was Arrested', Selected_Key: 'B', Duration_Sec: 310, Led_By: 'Worship Team' },
-        { Item_ID: 'out_05', Event_ID: 'ev_sun_20261122', Sort_Order: 5, Item_Type: 'element', Song_ID: '', Title: 'Pastoral Prayer & Tithes/Offerings', Selected_Key: '', Duration_Sec: 300, Led_By: 'Pastor Joel Newman' },
-        { Item_ID: 'out_06', Event_ID: 'ev_sun_20261122', Sort_Order: 6, Item_Type: 'song', Song_ID: 'sng_holy', Title: 'Holy Forever', Selected_Key: 'Bb', Duration_Sec: 320, Led_By: 'Worship Team (Transposed G -> Bb)' },
-        { Item_ID: 'out_07', Event_ID: 'ev_sun_20261122', Sort_Order: 7, Item_Type: 'element', Song_ID: '', Title: 'Sermon: Stepping Into the Waters (Joshua 3:1-17)', Selected_Key: '', Duration_Sec: 2100, Led_By: 'Pastor Joel Newman' },
-        { Item_ID: 'out_08', Event_ID: 'ev_sun_20261122', Sort_Order: 8, Item_Type: 'song', Song_ID: 'sng_battle', Title: 'Battle Belongs', Selected_Key: 'Db', Duration_Sec: 290, Led_By: 'Worship Team' }
+        { Item_ID: 'out_01', Event_ID: 'ev_sun_20261129', Sort_Order: 1, Item_Type: 'element', Song_ID: '', Title: '5-Minute Sacred Gold Countdown', Selected_Key: '', Duration_Sec: 300, Led_By: 'Audio Visual Team' },
+        { Item_ID: 'out_02', Event_ID: 'ev_sun_20261129', Sort_Order: 2, Item_Type: 'element', Song_ID: '', Title: 'Welcome & Advent Candle Lighting', Selected_Key: '', Duration_Sec: 300, Led_By: 'Wayne Crev' },
+        { Item_ID: 'out_03', Event_ID: 'ev_sun_20261129', Sort_Order: 3, Item_Type: 'song', Song_ID: 'sng_firm', Title: "Firm Foundation (He Won't)", Selected_Key: 'G', Duration_Sec: 330, Led_By: 'Wayne Crev & Worship Team' },
+        { Item_ID: 'out_04', Event_ID: 'ev_sun_20261129', Sort_Order: 4, Item_Type: 'song', Song_ID: 'sng_death', Title: 'Death Was Arrested', Selected_Key: 'B', Duration_Sec: 310, Led_By: 'Wayne Crev & Worship Team' },
+        { Item_ID: 'out_05', Event_ID: 'ev_sun_20261129', Sort_Order: 5, Item_Type: 'element', Song_ID: '', Title: 'Pastoral Prayer & Tithes/Offerings', Selected_Key: '', Duration_Sec: 300, Led_By: 'Pastor Joel Newman' },
+        { Item_ID: 'out_06', Event_ID: 'ev_sun_20261129', Sort_Order: 6, Item_Type: 'song', Song_ID: 'sng_holy', Title: 'Holy Forever', Selected_Key: 'Bb', Duration_Sec: 320, Led_By: 'Wayne Crev (Transposed G -> Bb)' },
+        { Item_ID: 'out_07', Event_ID: 'ev_sun_20261129', Sort_Order: 7, Item_Type: 'element', Song_ID: '', Title: 'Sermon: Hope Has Come (Isaiah 9:2-7)', Selected_Key: '', Duration_Sec: 2100, Led_By: 'Pastor Joel Newman' },
+        { Item_ID: 'out_08', Event_ID: 'ev_sun_20261129', Sort_Order: 8, Item_Type: 'song', Song_ID: 'sng_battle', Title: 'Battle Belongs', Selected_Key: 'Db', Duration_Sec: 290, Led_By: 'Wayne Crev & Worship Team' }
       ],
       schedules: [
-        { Assignment_ID: 'asg_01', Event_Date: '2026-11-22', Event_Title: 'Sunday AM Praise & Worship', Helper_Name: 'Wayne Crevoiserat', Role_Title: 'Worship Leader / Guitar', RSVP_Status: 'Accepted', RSVP_Token: 'tok_wayne_1122' },
-        { Assignment_ID: 'asg_02', Event_Date: '2026-11-22', Event_Title: 'Sunday AM Praise & Worship', Helper_Name: 'Cameron White', Role_Title: 'Media Director & Livestream', RSVP_Status: 'Accepted', RSVP_Token: 'tok_cameron_1122' },
-        { Assignment_ID: 'asg_03', Event_Date: '2026-11-22', Event_Title: 'Sunday AM Praise & Worship', Helper_Name: 'Lawton Stacey', Role_Title: 'Graphics Operator', RSVP_Status: 'Invited', RSVP_Token: 'tok_lawton_1122' },
-        { Assignment_ID: 'asg_04', Event_Date: '2026-11-22', Event_Title: "Children's Sunday School", Helper_Name: 'Sarah Gulick', Role_Title: 'Lead Teacher', RSVP_Status: 'Accepted', RSVP_Token: 'tok_sarah_1122' },
-        { Assignment_ID: 'asg_05', Event_Date: '2026-11-25', Event_Title: 'Celebrate Recovery', Helper_Name: 'Patricia Babb', Role_Title: 'Set-Up & Greeters (6:00 PM)', RSVP_Status: 'Accepted', RSVP_Token: 'tok_patricia_1125' },
-        { Assignment_ID: 'asg_06', Event_Date: '2026-11-25', Event_Title: 'Celebrate Recovery', Helper_Name: 'Dee (Huney) Huchton', Role_Title: 'Lesson / Open Share Leader', RSVP_Status: 'Accepted', RSVP_Token: 'tok_huney_1125' }
+        { Assignment_ID: 'asg_01', Event_Date: '2026-11-29', Event_Title: 'First Sunday of Advent Worship', Helper_Username: 'wayne.worship', Helper_Name: 'Wayne Crev', Role_Title: 'Worship Leader & Area Head', RSVP_Status: 'Accepted', RSVP_Token: 'tok_wayne_1129' },
+        { Assignment_ID: 'asg_02', Event_Date: '2026-11-29', Event_Title: 'First Sunday of Advent Worship', Helper_Username: 'leandra.worship', Helper_Name: 'Leandra Crevoiserat', Role_Title: 'Vocalist', RSVP_Status: 'Accepted', RSVP_Token: 'tok_leandra_1129' },
+        { Assignment_ID: 'asg_03', Event_Date: '2026-11-29', Event_Title: 'First Sunday of Advent Worship', Helper_Username: 'lawton.av', Helper_Name: 'Lawton Stacey', Role_Title: 'Graphics / Stream Operator', RSVP_Status: 'Invited', RSVP_Token: 'tok_lawton_1129' },
+        { Assignment_ID: 'asg_04', Event_Date: '2026-11-29', Event_Title: "Children's Ministry Check-In", Helper_Username: 'sarah.kids', Helper_Name: 'Sarah Gulick', Role_Title: "Children's Helper", RSVP_Status: 'Accepted', RSVP_Token: 'tok_sarah_1129' },
+        { Assignment_ID: 'asg_05', Event_Date: '2026-12-08', Event_Title: 'Monthly Church Board Meeting', Helper_Username: 'patricia.board', Helper_Name: 'Patricia Babb', Role_Title: 'Church Board Member', RSVP_Status: 'Accepted', RSVP_Token: 'tok_patricia_1208' },
+        { Assignment_ID: 'asg_06', Event_Date: '2026-12-08', Event_Title: 'Monthly Church Board Meeting', Helper_Username: 'yaresly.godwin', Helper_Name: 'Yaresly Godwin', Role_Title: 'Church Board Secretary', RSVP_Status: 'Accepted', RSVP_Token: 'tok_yaresly_1208' }
       ],
       givingBatches: [
         { Batch_ID: 'bat_1108_sun', Month_Key: '2026-11', Batch_Date: '2026-11-08', Batch_Type: 'In-Person Giving', Description: 'November 8, 2026 (Sunday Offering)', Locked: 'Yes', Count_Sheet_Drive_URL: '' },
@@ -321,6 +325,9 @@
     const totalUnpaidAp = bankSummary.reduce((a, b) => a + b.unpaidBills, 0);
     const drift = Math.round((totalBankCash - totalFundBal) * 100) / 100;
 
+    const wef5Pct = Math.round(totalGiving * 0.05 * 100) / 100;
+    const district8Pct = Math.round((totalGiving - wef5Pct) * 0.08 * 100) / 100;
+
     return {
       sundaysRecorded,
       avgAdults: avgByCat('Sunday Worship - Adults'),
@@ -338,6 +345,8 @@
       onlineGiving,
       onlinePct,
       inKindTotal,
+      wef5Pct,
+      district8Pct,
       bankSummary,
       fundSummary,
       totalBankCash,
@@ -457,7 +466,7 @@
         { id: 'ministry', label: 'People/Att', icon: ICONS.attendance },
         { id: 'worship', label: 'Worship', icon: ICONS.worship },
         { id: 'finance', label: 'Finance', icon: ICONS.finance },
-        { id: 'admin_users', label: 'Users', icon: ICONS.users }
+        { id: 'admin_users', label: 'Users/Pilot', icon: ICONS.users }
       ];
     }
     if (role === 'treasurer') {
@@ -466,6 +475,12 @@
         { id: 'finance', label: 'Accounting', icon: ICONS.finance },
         { id: 'counter', label: 'Giving', icon: ICONS.heart },
         { id: 'reports', label: 'Month-End', icon: ICONS.reports }
+      ];
+    }
+    if (role === 'board_member') {
+      return [
+        { id: 'home', label: 'Board Pulse', icon: ICONS.reports },
+        { id: 'schedules_my', label: 'Board Dates', icon: ICONS.calendar }
       ];
     }
     if (role === 'offering_counter') {
@@ -478,7 +493,7 @@
       return [
         { id: 'home', label: 'Today', icon: ICONS.home },
         { id: 'worship', label: 'Outlines', icon: ICONS.worship },
-        { id: 'worship_stage', label: 'Chords', icon: ICONS.calendar },
+        { id: 'worship_stage', label: 'Chords/Capo', icon: ICONS.calendar },
         { id: 'schedules', label: 'Helpers', icon: ICONS.attendance }
       ];
     }
@@ -488,11 +503,10 @@
         { id: 'worship_stage', label: 'Stage Chords', icon: ICONS.worship }
       ];
     }
-    // ministry_helper
+    // ministry_helper (e.g. Sarah Gulick — Children's Helper Only)
     return [
       { id: 'home', label: 'Today', icon: ICONS.home },
-      { id: 'ministry', label: 'Attendance', icon: ICONS.attendance },
-      { id: 'visitor_entry', label: 'Visitor Card', icon: ICONS.visitors },
+      { id: 'ministry', label: 'Kids Check-In', icon: ICONS.attendance },
       { id: 'schedules_my', label: 'My Dates', icon: ICONS.calendar }
     ];
   }
@@ -518,7 +532,7 @@
       subEl.textContent = '1-Tap Ministry Schedule Confirmation';
     } else if (state.user) {
       const preset = CFG.rolePresets[state.user.role] || { badge: state.user.role };
-      badgeEl.textContent = preset.badge + (state.isSimulated ? ' • DEMO' : '');
+      badgeEl.textContent = preset.badge + (state.isSimulated ? ' • PILOT' : '');
       const scopeTxt = Array.isArray(state.user.ministryScopes) ? state.user.ministryScopes.join(', ') : state.user.ministryScopes;
       subEl.textContent = state.user.fullName + (scopeTxt && scopeTxt !== '*' ? ' • ' + scopeTxt : '');
     }
@@ -605,50 +619,54 @@
     let heroTargetTab = 'ministry';
 
     if (role === 'super_admin') {
-      heroTitle = 'Pastoral & Month-End Pulse';
-      heroDesc = '2 new Sunday & CR visitor follow-ups pending • All 4 Google Sheets Vault workbooks synced with $0.00 fund drift.';
-      heroBtnLabel = 'Provision Helpers & Access';
+      heroTitle = 'Super Admin & Pilot Command (' + esc(state.user.fullName) + ')';
+      heroDesc = '172 real ChurchTrac people, 93 households & 523 contributions migrated into Vault • Tap below to share phone pilot links or review feedback.';
+      heroBtnLabel = 'Share Phone Pilot Links & Provision Users';
       heroTargetTab = 'admin_users';
     } else if (role === 'treasurer') {
-      heroTitle = 'Friday Cash & Bills Review';
-      heroDesc = '4 AP bills due next 5 days (' + fmtMoney(m.totalUnpaidAp) + ') • Bank vs. True Fund drift: ' + fmtMoney(m.drift) + '.';
-      heroBtnLabel = 'Open Accounting & Friday Cash';
+      heroTitle = 'Treasurer Hub — Dee "Huney" Huchton';
+      heroDesc = 'AP bills due: ' + fmtMoney(m.totalUnpaidAp) + ' • WEF (5%): ' + fmtMoney(m.wef5Pct) + ' • District (8%): ' + fmtMoney(m.district8Pct) + ' • Drift: $0.00.';
+      heroBtnLabel = 'Open Accounting, Transfers & Friday Cash';
       heroTargetTab = 'finance';
+    } else if (role === 'board_member') {
+      heroTitle = 'Church Board Executive Summary';
+      heroDesc = 'Review live Month-End & Nazarene APR Attendance, Visitor Growth, Aggregate Stewardship, and Fund Health (donor PII kept confidential).';
+      heroBtnLabel = 'View Upcoming Board Dates';
+      heroTargetTab = 'schedules_my';
     } else if (role === 'offering_counter') {
       heroTitle = 'Sunday Offering Count Ready';
       heroDesc = 'Enter cash/check envelopes, snap a photo of the signed Count Sheet, and lock batch when balanced.';
       heroBtnLabel = 'Start Counting Batch';
       heroTargetTab = 'counter';
     } else if (role === 'worship_leader') {
-      heroTitle = 'Sunday AM Worship Ready';
-      heroDesc = '8 outline items loaded • 1 helper invite awaiting RSVP (Lawton Stacey — Graphics).';
-      heroBtnLabel = 'Open Service Outline';
+      heroTitle = 'Worship Area Head — Wayne Crev';
+      heroDesc = '8 Advent outline items ready • Guitar Capo calculator & 12-key stage charts active.';
+      heroBtnLabel = 'Edit Service Outline & Team';
       heroTargetTab = 'worship';
     } else if (role === 'ministry_helper') {
       const scopes = (state.user.ministryScopes || []).join(', ');
-      heroTitle = 'Take ' + (scopes || 'Ministry') + ' Attendance';
-      heroDesc = 'Tap names present, add unnamed guests, or snap a paper Visitor Card straight to Google Drive.';
-      heroBtnLabel = 'Take Attendance Now';
+      heroTitle = "Children's Helper Check-In (" + esc(scopes || 'Children') + ')';
+      heroDesc = 'Check children in with automatic 4-digit parent pickup security badges.';
+      heroBtnLabel = 'Open Kids Check-In Roster';
       heroTargetTab = 'ministry';
     }
 
     let html = '<div class="section-stack">';
     html +=
       '<section class="card card--action-hero">' +
-      '<span class="eyebrow-tag">SMART MOBILE ACTION</span>' +
+      '<span class="eyebrow-tag">SMART MOBILE ACTION &bull; TAP 💬 BELOW TO SUGGEST CHANGES</span>' +
       '<h1 class="card-title" style="font-size: 1.2rem; margin-top: 8px;">' + esc(heroTitle) + '</h1>' +
       '<p class="card-subtitle" style="margin-bottom: 14px;">' + esc(heroDesc) + '</p>' +
       '<button type="button" id="hero-primary-cta" class="btn btn--gold btn--full" data-jump-tab="' + heroTargetTab + '">' +
       esc(heroBtnLabel) + ' &rarr;</button>' +
       '</section>';
 
-    if (role === 'super_admin' || role === 'treasurer') {
+    if (role === 'super_admin' || role === 'treasurer' || role === 'board_member') {
       html += renderReportsView();
     } else {
-      // Helper upcoming assignments snippet
       html +=
         '<section class="card">' +
-        '<div class="card-head"><div><h2 class="card-title">Upcoming Ministry Dates</h2><p class="card-subtitle">Tap Accept or Decline on your assigned roles</p></div></div>' +
+        '<div class="card-head"><div><h2 class="card-title">Upcoming Ministry Dates</h2><p class="card-subtitle">Your assigned area events</p></div></div>' +
         '<div class="list-stack">' +
         state.data.events
           .slice(0, 3)
@@ -677,14 +695,16 @@
   function renderReportsView() {
     const m = computeSelfCalculatingMetrics(state.reportMonth);
     const links = state.data.vaultLinks || {};
-    const isSuper = state.user && state.user.role === 'super_admin';
+    const role = (state.user && state.user.role) || '';
+    const isSuper = role === 'super_admin';
+    const isTreas = role === 'treasurer';
 
     return (
       '<section class="card">' +
       '<div class="card-head">' +
       '<div>' +
-      '<h2 class="card-title">Self-Calculating Month-End &amp; APR Rollups</h2>' +
-      '<p class="card-subtitle">Auto-calculated behind the scenes in your Google Drive Vault</p>' +
+      '<h2 class="card-title">Self-Calculating Month-End &amp; Nazarene APR Rollups</h2>' +
+      '<p class="card-subtitle">Auto-calculated in your Google Drive Vault (incl. WEF 5% &amp; District 8%)</p>' +
       '</div>' +
       '<select id="report-month-select" class="select" style="width: auto; min-height: 38px; font-size: 13px;">' +
       '<option value="2026-11" ' + (state.reportMonth === '2026-11' ? 'selected' : '') + '>November 2026</option>' +
@@ -695,38 +715,84 @@
       '<div class="kpi-grid">' +
       '<div class="kpi-tile"><span class="kpi-tile__label">Avg Sunday Worship</span><div class="kpi-tile__val kpi-tile__val--gold">' + m.avgCombinedWorship + '</div><span class="kpi-tile__meta">' + m.avgAdults + ' Adults + ' + m.avgKids + ' Kids (' + m.sundaysRecorded + ' Sun)</span></div>' +
       '<div class="kpi-tile"><span class="kpi-tile__label">New 1st-Time Visitors</span><div class="kpi-tile__val">' + m.firstTimeVis + '</div><span class="kpi-tile__meta">' + m.secondTimeVis + ' Return &bull; ' + m.followUpPct + '% F-Up Done</span></div>' +
-      '<div class="kpi-tile"><span class="kpi-tile__label">Avg Weekly Giving</span><div class="kpi-tile__val kpi-tile__val--emerald">' + fmtMoney(m.avgWeeklyGiving) + '</div><span class="kpi-tile__meta">Total: ' + fmtMoney(m.totalGiving) + ' (' + m.onlinePct + '% Stripe)</span></div>' +
-      '<div class="kpi-tile"><span class="kpi-tile__label">Midweek Averages</span><div class="kpi-tile__val">CR ' + m.avgCr + '</div><span class="kpi-tile__meta">SHIELD ' + m.avgShield + ' &bull; Sun School ' + m.avgSundaySchool + '</span></div>' +
+      '<div class="kpi-tile"><span class="kpi-tile__label">Avg Weekly Giving</span><div class="kpi-tile__val kpi-tile__val--emerald">' + fmtMoney(m.avgWeeklyGiving) + '</div><span class="kpi-tile__meta">Total: ' + fmtMoney(m.totalGiving) + '</span></div>' +
+      '<div class="kpi-tile"><span class="kpi-tile__label">WEF (5%) &amp; District (8%)</span><div class="kpi-tile__val">' + fmtMoney(m.wef5Pct) + '</div><span class="kpi-tile__meta">District 8%: ' + fmtMoney(m.district8Pct) + '</span></div>' +
       '</div>' +
       '<div style="margin-top: 12px;" class="kpi-grid">' +
       '<div class="kpi-tile"><span class="kpi-tile__label">Total Bank Cash (4 Accts)</span><div class="kpi-tile__val">' + fmtMoney(m.totalBankCash) + '</div><span class="kpi-tile__meta">After Bills: ' + fmtMoney(m.totalBankCash - m.totalUnpaidAp) + '</span></div>' +
       '<div class="kpi-tile"><span class="kpi-tile__label">True Fund Balance (5 Funds)</span><div class="kpi-tile__val kpi-tile__val--emerald">' + fmtMoney(m.totalFundBal) + '</div><span class="kpi-tile__meta">' + (m.drift === 0 ? 'BALANCED ($0.00 Drift)' : 'Drift: ' + fmtMoney(m.drift)) + '</span></div>' +
-      '<div class="kpi-tile"><span class="kpi-tile__label">Professions of Faith</span><div class="kpi-tile__val kpi-tile__val--gold">' + m.professions + '</div><span class="kpi-tile__meta">Nazarene APR Evangelism</span></div>' +
-      '<div class="kpi-tile"><span class="kpi-tile__label">In-Kind (Non-Cash)</span><div class="kpi-tile__val">' + fmtMoney(m.inKindTotal) + '</div><span class="kpi-tile__meta">Tracked separately per IRS</span></div>' +
+      '<div class="kpi-tile"><span class="kpi-tile__label">Midweek Averages</span><div class="kpi-tile__val">CR ' + m.avgCr + '</div><span class="kpi-tile__meta">SHIELD ' + m.avgShield + ' &bull; SS ' + m.avgSundaySchool + '</span></div>' +
+      '<div class="kpi-tile"><span class="kpi-tile__label">Professions &amp; In-Kind</span><div class="kpi-tile__val kpi-tile__val--gold">' + m.professions + ' Decisions</div><span class="kpi-tile__meta">In-Kind: ' + fmtMoney(m.inKindTotal) + '</span></div>' +
       '</div>' +
-      '<div style="margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--border-subtle);">' +
-      '<span class="field-label" style="display:block; margin-bottom:8px;">Open Behind-the-Scenes Google Drive Vault</span>' +
-      '<div style="display:flex; flex-wrap:wrap; gap:8px;">' +
-      '<a class="btn btn--secondary btn--sm" href="' + esc(links.vaultFolder || CFG.vault.folderUrl) + '" target="_blank" rel="noopener">Master Vault Folder &nearr;</a>' +
-      (isSuper ? '<a class="btn btn--secondary btn--sm" href="' + esc(CFG.vault.workbooks.people.url) + '" target="_blank" rel="noopener">02 People &amp; Attendance Sheet &nearr;</a>' : '') +
-      (isSuper ? '<a class="btn btn--secondary btn--sm" href="' + esc(CFG.vault.workbooks.worship.url) + '" target="_blank" rel="noopener">03 Worship Sheet &nearr;</a>' : '') +
-      '<a class="btn btn--secondary btn--sm" href="' + esc(CFG.vault.workbooks.finance.url) + '" target="_blank" rel="noopener">04 Giving &amp; Accounting Sheet &nearr;</a>' +
-      '</div></div></section>'
+      ((isSuper || isTreas)
+        ? '<div style="margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--border-subtle);">' +
+          '<span class="field-label" style="display:block; margin-bottom:8px;">Open Behind-the-Scenes Google Drive Vault</span>' +
+          '<div style="display:flex; flex-wrap:wrap; gap:8px;">' +
+          '<a class="btn btn--secondary btn--sm" href="' + esc(links.vaultFolder || CFG.vault.folderUrl) + '" target="_blank" rel="noopener">Master Vault Folder &nearr;</a>' +
+          (isSuper ? '<a class="btn btn--secondary btn--sm" href="' + esc(CFG.vault.workbooks.people.url) + '" target="_blank" rel="noopener">02 People (172 Real Records) &nearr;</a>' : '') +
+          (isSuper ? '<a class="btn btn--secondary btn--sm" href="' + esc(CFG.vault.workbooks.worship.url) + '" target="_blank" rel="noopener">03 Worship Sheet &nearr;</a>' : '') +
+          '<a class="btn btn--secondary btn--sm" href="' + esc(CFG.vault.workbooks.finance.url) + '" target="_blank" rel="noopener">04 Giving &amp; Accounting (523 Gifts) &nearr;</a>' +
+          '</div></div>'
+        : '') +
+      '</section>'
     );
   }
 
   // ==========================================================================
-  // VIEW 2: 1-TAP MOBILE ATTENDANCE, CHILD SECURITY BADGES & VISITORS
+  // VIEW 2: DIRECTORY, 1-TAP MOBILE ATTENDANCE, KIDS CHECK-IN & VISITORS
   // ==========================================================================
   function renderMinistryAttendanceTab() {
-    const curSub = state.subTab || 'headcount';
+    const isSuper = state.user && state.user.role === 'super_admin';
+    const isKidsOnly = state.user && state.user.role === 'ministry_helper' && (state.user.ministryScopes || []).indexOf('Children') !== -1;
+    const defaultSub = isKidsOnly ? 'roster' : 'headcount';
+    const curSub = state.subTab || defaultSub;
+
     let html = '<div class="section-stack">';
     html +=
       '<div class="sub-tabs">' +
-      '<button type="button" class="sub-tab-btn ' + (curSub === 'headcount' ? 'is-active' : '') + '" data-subtab="headcount">Sunday Headcount</button>' +
-      '<button type="button" class="sub-tab-btn ' + (curSub === 'roster' ? 'is-active' : '') + '" data-subtab="roster">CR / Kids Roster Check-In</button>' +
-      '<button type="button" class="sub-tab-btn ' + (curSub === 'visitors_list' ? 'is-active' : '') + '" data-subtab="visitors_list">Visitor Cards &amp; Follow-Up</button>' +
+      (!isKidsOnly ? '<button type="button" class="sub-tab-btn ' + (curSub === 'headcount' ? 'is-active' : '') + '" data-subtab="headcount">Sunday Headcount</button>' : '') +
+      '<button type="button" class="sub-tab-btn ' + (curSub === 'roster' ? 'is-active' : '') + '" data-subtab="roster">' + (isKidsOnly ? "Children's Check-In" : 'Kids &amp; Ministry Check-In') + '</button>' +
+      (isSuper ? '<button type="button" class="sub-tab-btn ' + (curSub === 'directory' ? 'is-active' : '') + '" data-subtab="directory">People Directory (172)</button>' : '') +
+      (!isKidsOnly ? '<button type="button" class="sub-tab-btn ' + (curSub === 'visitors_list' ? 'is-active' : '') + '" data-subtab="visitors_list">Visitor Cards &amp; Follow-Up</button>' : '') +
       '</div>';
+
+    if (curSub === 'directory' && isSuper) {
+      const q = state.dirQuery.toLowerCase();
+      const filtered = state.data.people.filter(p => {
+        const matchQ = !q || (p.First_Name + ' ' + p.Last_Name + ' ' + (p.Email || '') + ' ' + (p.Mobile_Phone || '')).toLowerCase().indexOf(q) !== -1;
+        const matchSt = state.dirStatusFilter === 'All' || p.Member_Status === state.dirStatusFilter;
+        return matchQ && matchSt;
+      });
+      html +=
+        '<section class="card">' +
+        '<div class="card-head"><div><h1 class="card-title">LFC Directory &amp; Households</h1><p class="card-subtitle">Synced with 172 migrated ChurchTrac records in <code>02_LFC_People_Events_&amp;_Attendance</code></p></div></div>' +
+        '<div class="form-grid-2" style="margin-bottom:12px;">' +
+        '<input id="dir-search-input" class="input" placeholder="Search name, phone, or email..." value="' + esc(state.dirQuery) + '" />' +
+        '<select id="dir-status-select" class="select">' +
+        ['All', 'Voting Member', 'Affiliated', 'Child', 'Visitor', 'AWOL (Needs F-UP)'].map(s => '<option value="' + esc(s) + '" ' + (state.dirStatusFilter === s ? 'selected' : '') + '>' + esc(s) + '</option>').join('') +
+        '</select></div>' +
+        '<div class="list-stack" style="margin-bottom:14px;">' +
+        filtered.slice(0, 40).map(p =>
+          '<div class="list-row"><div class="list-row__main"><div class="list-row__title">' + esc(p.First_Name + ' ' + p.Last_Name) + ' <span class="badge badge--gold">' + esc(p.Member_Status) + '</span></div>' +
+          '<div class="list-row__meta">' + esc(p.Role_Note || p.Ministry_Summary || p.Age_Category || '') + (p.Mobile_Phone ? ' &bull; ' + esc(p.Mobile_Phone) : '') + (p.Email ? ' &bull; ' + esc(p.Email) : '') + '</div></div>' +
+          (p.Mobile_Phone ? '<a class="btn btn--secondary btn--sm" href="tel:' + esc(p.Mobile_Phone) + '">📞 Call</a>' : '') +
+          '</div>'
+        ).join('') +
+        '</div>' +
+        '<form id="add-person-form" style="border-top:1px solid var(--border-subtle); padding-top:12px;">' +
+        '<span class="field-label" style="display:block; margin-bottom:8px;">+ Add Person to Church Directory (Defaults Safely to Visitor)</span>' +
+        '<div class="form-grid-2">' +
+        '<div class="field"><input id="np-first" class="input" placeholder="First Name" required /></div>' +
+        '<div class="field"><input id="np-last" class="input" placeholder="Last Name" required /></div>' +
+        '</div>' +
+        '<div class="form-grid-2">' +
+        '<div class="field"><select id="np-status" class="select"><option>Visitor</option><option>Affiliated</option><option>Child</option><option>Voting Member</option></select></div>' +
+        '<div class="field"><input id="np-phone" class="input" placeholder="Mobile Phone" /></div>' +
+        '</div>' +
+        '<button type="submit" class="btn btn--gold btn--full">+ Save Person to Vault Directory</button></form></section>';
+      html += '</div>';
+      return html;
+    }
 
     if (curSub === 'headcount') {
       const combined = state.attHeadcountAdults + state.attHeadcountKids;
@@ -748,29 +814,36 @@
         '</section>';
     } else if (curSub === 'roster') {
       const checkedCount = Object.values(state.attRosterChecked).filter(Boolean).length;
+      const rosterPool = isKidsOnly
+        ? state.data.people.filter(p => p.Member_Status === 'Child')
+        : state.data.people;
       html +=
         '<section class="card">' +
-        '<div class="card-head"><div><h1 class="card-title">Group Roster &amp; Child Security Check-In</h1><p class="card-subtitle">Tap names to mark Present; Children receive a 4-digit parent pickup code</p></div>' +
+        '<div class="card-head"><div><h1 class="card-title">' + (isKidsOnly ? "Children's Security Check-In &amp; Attendance" : 'Group Roster &amp; Child Security Check-In') + '</h1><p class="card-subtitle">Tap names to mark Present; Children receive a 4-digit parent pickup code</p></div>' +
         '<select id="roster-group-select" class="select" style="width:auto; min-height:38px;">' +
-        '<option value="Celebrate Recovery">Celebrate Recovery (Wed 7 PM)</option>' +
-        '<option value="Sunday School">Children Sunday School (11 AM)</option>' +
-        '<option value="SHIELD Ministry">SHIELD Kids &amp; Youth (Wed 6 PM)</option>' +
+        (isKidsOnly
+          ? '<option value="Sunday Worship - Children">Children\'s Worship &amp; Nursery (10:30 AM)</option>' +
+            '<option value="LFC Kids Club">LFC Kids Club (Wed 6:00 PM)</option>'
+          : '<option value="Sunday Worship - Children">Children\'s Worship &amp; Nursery (10:30 AM)</option>' +
+            '<option value="Sunday School">Sunday School (9:30 AM)</option>' +
+            '<option value="Celebrate Recovery">Celebrate Recovery (Wed 7:00 PM)</option>' +
+            '<option value="SHIELD Ministry">SHIELD Kids &amp; Youth (Wed 6:00 PM)</option>') +
         '</select></div>' +
         '<div class="list-stack" style="margin-bottom:12px;">' +
-        state.data.people
+        rosterPool
           .map(p => {
             const present = Boolean(state.attRosterChecked[p.Person_ID]);
             const badge = p.Member_Status === 'Child' && present ? '<span class="badge badge--gold">Pickup Badge #K8F4</span>' : '';
             return (
               '<button type="button" class="roster-check-btn ' + (present ? 'is-present' : '') + '" data-toggle-person="' + esc(p.Person_ID) + '">' +
-              '<div><div class="list-row__title">' + esc(p.First_Name + ' ' + p.Last_Name) + '</div><div class="list-row__meta">' + esc(p.Member_Status) + '</div></div>' +
+              '<div><div class="list-row__title">' + esc(p.First_Name + ' ' + p.Last_Name) + '</div><div class="list-row__meta">' + esc(p.Role_Note || p.Member_Status) + '</div></div>' +
               '<div style="display:flex; align-items:center; gap:8px;">' + badge + '<span class="badge ' + (present ? 'badge--emerald' : 'badge--sky') + '">' + (present ? 'Present ✓' : 'Tap Check-In') + '</span></div>' +
               '</button>'
             );
           })
           .join('') +
         '</div>' +
-        '<div class="stepper-box" style="margin-bottom:12px;"><div><div class="list-row__title">Unnamed Walk-In Guests</div><div class="list-row__meta">Added to named roster (' + checkedCount + ' checked in)</div></div>' +
+        '<div class="stepper-box" style="margin-bottom:12px;"><div><div class="list-row__title">' + (isKidsOnly ? 'Visiting Children Today' : 'Unnamed Walk-In Guests') + '</div><div class="list-row__meta">Added to named roster (' + checkedCount + ' checked in)</div></div>' +
         '<div class="stepper-controls"><button type="button" class="stepper-btn" data-step="unnamed:-1">&minus;</button><span class="stepper-val">' + state.attUnnamedGuests + '</span><button type="button" class="stepper-btn" data-step="unnamed:1">+</button></div></div>' +
         '<button type="button" id="save-roster-session-btn" class="btn btn--gold btn--full">Save Roster Attendance (' + (checkedCount + state.attUnnamedGuests) + ' Total)</button>' +
         '</section>';
@@ -893,12 +966,17 @@
       window.LFCChordPro.DISPLAY_KEYS.map(k => '<option value="' + k + '" ' + (k === targetKey ? 'selected' : '') + '>Key of ' + k + '</option>').join('') +
       '</select></div>' +
       '</div>' +
-      '<div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:12px;">' +
+      '<div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:10px;">' +
       '<button type="button" id="toggle-chords-btn" class="btn btn--secondary btn--sm">' + (state.showChords ? 'Hide Chords (Lyrics Only)' : 'Show Chords') + '</button>' +
       '<button type="button" id="font-smaller-btn" class="btn btn--secondary btn--sm">A&minus;</button>' +
       '<button type="button" id="font-larger-btn" class="btn btn--secondary btn--sm">A+</button>' +
       '<span class="badge badge--gold" style="margin-left:auto;">' + esc(song.BPM || 74) + ' BPM &bull; CCLI #' + esc(song.CCLI_Number || '—') + '</span>' +
       '</div>' +
+      (window.LFCChordPro.getCapoSuggestions(targetKey).length
+        ? '<div style="margin-bottom:12px; display:flex; gap:6px; flex-wrap:wrap; align-items:center;"><span class="field-label">🎸 Guitar Capo Options:</span>' +
+          window.LFCChordPro.getCapoSuggestions(targetKey).slice(0, 3).map(c => '<span class="badge badge--emerald">' + esc(c.label) + '</span>').join('') +
+          '</div>'
+        : '') +
       '<div class="chord-stage-surface" style="font-size:' + state.chordFontSize + 'px;">' +
       renderedChart +
       '</div></section></div>'
@@ -906,11 +984,14 @@
   }
 
   function renderSchedulesTab(onlyMine) {
-    const rows = state.data.schedules;
+    const uname = state.user && state.user.username;
+    const rows = onlyMine && uname
+      ? state.data.schedules.filter(s => s.Helper_Username === uname)
+      : state.data.schedules;
     return (
       '<div class="section-stack"><section class="card">' +
-      '<h1 class="card-title">' + (onlyMine ? 'My Serving Schedule &amp; 1-Tap RSVP' : 'Ministry Helper Schedules &amp; SMS Invites') + '</h1>' +
-      '<p class="card-subtitle" style="margin-bottom:12px;">Helpers receive a 1-tap Twilio SMS magic link to Accept or Decline without logging in.</p>' +
+      '<h1 class="card-title">' + (onlyMine ? 'My Upcoming Dates &amp; 1-Tap RSVP' : 'Ministry &amp; Board Schedules + SMS Invites') + '</h1>' +
+      '<p class="card-subtitle" style="margin-bottom:12px;">Helpers &amp; Board members receive a 1-tap Twilio SMS magic link to confirm without logging in.</p>' +
       '<div class="list-stack">' +
       rows
         .map(
@@ -992,10 +1073,17 @@
     html +=
       '<div class="sub-tabs">' +
       '<button type="button" class="sub-tab-btn ' + (finSub === 'ap_bills' ? 'is-active' : '') + '" data-subtab="ap_bills">AP Bills Inbox</button>' +
-      '<button type="button" class="sub-tab-btn ' + (finSub === 'bank_feeds' ? 'is-active' : '') + '" data-subtab="bank_feeds">Plaid / CSV Bank Feeds</button>' +
-      '<button type="button" class="sub-tab-btn ' + (finSub === 'funds_banks' ? 'is-active' : '') + '" data-subtab="funds_banks">4 Banks &amp; 5 True Funds</button>' +
-      '<button type="button" class="sub-tab-btn ' + (finSub === 'friday_cash' ? 'is-active' : '') + '" data-subtab="friday_cash">Friday Treasurer Matrix</button>' +
+      '<button type="button" class="sub-tab-btn ' + (finSub === 'transfers_tax' ? 'is-active' : '') + '" data-subtab="transfers_tax">Transfers &amp; IRS Statements</button>' +
+      '<button type="button" class="sub-tab-btn ' + (finSub === 'bank_feeds' ? 'is-active' : '') + '" data-subtab="bank_feeds">Plaid / CSV Feeds</button>' +
+      '<button type="button" class="sub-tab-btn ' + (finSub === 'funds_banks' ? 'is-active' : '') + '" data-subtab="funds_banks">4 Banks &amp; 5 Funds</button>' +
+      '<button type="button" class="sub-tab-btn ' + (finSub === 'friday_cash' ? 'is-active' : '') + '" data-subtab="friday_cash">Friday Cash Matrix</button>' +
       '</div>';
+
+    if (finSub === 'transfers_tax' && window.LFCDeepFeatures) {
+      html += window.LFCDeepFeatures.renderAtomicTransferAndTaxStatement(state, esc, fmtMoney);
+      html += '</div>';
+      return html;
+    }
 
     if (finSub === 'ap_bills') {
       html +=
@@ -1072,8 +1160,8 @@
     } else {
       html +=
         '<section class="card">' +
-        '<h1 class="card-title">Friday Treasurer Cash Position &amp; Checklist</h1>' +
-        '<p class="card-subtitle" style="margin-bottom:12px;">Live bridge between AP Bills, Bank Balances, and your Friday meeting review</p>' +
+        '<h1 class="card-title">Friday Treasurer Cash Position — Dee "Huney" Huchton</h1>' +
+        '<p class="card-subtitle" style="margin-bottom:12px;">Live bridge between AP Bills, Bank Balances, and Friday Cash review</p>' +
         '<div class="kpi-grid" style="margin-bottom:12px;">' +
         '<div class="kpi-tile"><span class="kpi-tile__label">Cash in 4 Banks</span><div class="kpi-tile__val">' + fmtMoney(m.totalBankCash) + '</div></div>' +
         '<div class="kpi-tile"><span class="kpi-tile__label">Due Next 5 Days</span><div class="kpi-tile__val kpi-tile__val--gold">' + fmtMoney(m.totalUnpaidAp) + '</div></div>' +
@@ -1097,32 +1185,38 @@
   }
 
   // ==========================================================================
-  // VIEW 5: SUPER ADMIN USER & ACCESS PROVISIONING CONSOLE (Goal #4)
+  // VIEW 5: SUPER ADMIN USER PROVISIONING & PILOT FEEDBACK CONSOLE
   // ==========================================================================
   function renderSuperAdminUsersTab() {
     if (!state.user || state.user.role !== 'super_admin') {
-      return '<section class="card"><h1 class="card-title">Super Admin Only</h1><p class="card-subtitle">Only Super Admin can provision helper usernames, passwords, and ministry scopes.</p></section>';
+      return '<section class="card"><h1 class="card-title">Super Admin Only</h1><p class="card-subtitle">Only Super Admins (Pastor Joel &amp; Board Secretary Yaresly Godwin) can provision accounts.</p></section>';
     }
+
+    const pilotSection = window.LFCDeepFeatures
+      ? window.LFCDeepFeatures.renderPilotShareAndFeedbackAdmin(state, esc, showToast, callVaultApi, renderMainWorkspace)
+      : '';
 
     return (
       '<div class="section-stack">' +
+      pilotSection +
       '<section class="card card--action-hero">' +
-      '<span class="eyebrow-tag">GOAL #4 &bull; SUPER ADMIN EXCLUSIVE</span>' +
-      '<h1 class="card-title" style="margin-top:6px;">Provision New Ministry Helper</h1>' +
+      '<span class="eyebrow-tag">SUPER ADMIN PROVISIONING (PASTOR JOEL &amp; YARESLY GODWIN)</span>' +
+      '<h1 class="card-title" style="margin-top:6px;">Provision New Ministry Helper or Board Account</h1>' +
       '<p class="card-subtitle" style="margin-bottom:14px;">Creates a salted SHA-256 credential inside <code>01_LFC_System_Auth_&amp;_Audit</code> with exact module &amp; ministry scopes.</p>' +
       '<form id="provision-user-form">' +
       '<div class="form-grid-2">' +
-      '<div class="field"><label class="field-label" for="prov-fullname">Helper Full Name</label><input id="prov-fullname" class="input" placeholder="e.g. Dee (Huney) Huchton" required /></div>' +
-      '<div class="field"><label class="field-label" for="prov-username">Unique Username</label><input id="prov-username" class="input" placeholder="e.g. huney.cr" autocapitalize="none" required /></div>' +
+      '<div class="field"><label class="field-label" for="prov-fullname">Full Name</label><input id="prov-fullname" class="input" placeholder="e.g. Lawton Stacey" required /></div>' +
+      '<div class="field"><label class="field-label" for="prov-username">Unique Username</label><input id="prov-username" class="input" placeholder="e.g. lawton.av" autocapitalize="none" required /></div>' +
       '</div>' +
       '<div class="form-grid-2">' +
       '<div class="field"><label class="field-label" for="prov-password">Temporary Password (8+ chars)</label><input id="prov-password" class="input" value="LFC-Helper-2026!" minlength="8" required /></div>' +
       '<div class="field"><label class="field-label" for="prov-role">Role Preset</label><select id="prov-role" class="select">' +
-      '<option value="ministry_helper">Ministry Helper / Teacher</option>' +
-      '<option value="worship_team">Worship / AV Musician</option>' +
-      '<option value="worship_leader">Worship Planner</option>' +
+      '<option value="ministry_helper">Ministry Helper (Scoped)</option>' +
+      '<option value="board_member">Church Board Member (Reports Only)</option>' +
+      '<option value="worship_team">Worship / AV Team Member</option>' +
+      '<option value="worship_leader">Worship Leader &amp; Area Head</option>' +
       '<option value="offering_counter">Offering Counter</option>' +
-      '<option value="treasurer">Treasurer / Bookkeeper</option>' +
+      '<option value="treasurer">Church Treasurer</option>' +
       '<option value="super_admin">Super Admin (Full Access)</option>' +
       '</select></div>' +
       '</div>' +
@@ -1135,7 +1229,7 @@
       CFG.allMinistryScopes
         .map(
           sc =>
-            '<label class="chk-pill"><input type="checkbox" name="prov_scope" value="' + esc(sc) + '" ' + (sc === 'Celebrate Recovery' ? 'checked' : '') + ' /><span>' + esc(sc) + '</span></label>'
+            '<label class="chk-pill"><input type="checkbox" name="prov_scope" value="' + esc(sc) + '" ' + (sc === 'Children' ? 'checked' : '') + ' /><span>' + esc(sc) + '</span></label>'
         )
         .join('') +
       '</div></div>' +
@@ -1145,7 +1239,7 @@
         .map(
           m =>
             '<label class="chk-pill"><input type="checkbox" name="prov_mod" value="' + esc(m.id) + '" ' +
-            (['dashboard', 'attendance', 'visitors', 'schedules_my'].indexOf(m.id) !== -1 ? 'checked' : '') +
+            (['dashboard', 'attendance', 'schedules_my'].indexOf(m.id) !== -1 ? 'checked' : '') +
             ' /><span>' + esc(m.label) + '</span></label>'
         )
         .join('') +
@@ -1153,7 +1247,7 @@
       '<button type="submit" id="create-helper-btn" class="btn btn--gold btn--full">+ Create Helper Account &amp; Permissions</button>' +
       '</form></section>' +
       '<section class="card">' +
-      '<div class="card-head"><div><h2 class="card-title">Provisioned Staff &amp; Ministry Helpers (' + state.data.users.length + ')</h2><p class="card-subtitle">Reset passwords or suspend phone sessions in 1 tap</p></div>' +
+      '<div class="card-head"><div><h2 class="card-title">Provisioned Leaders &amp; Helpers (' + state.data.users.length + ')</h2><p class="card-subtitle">Reset passwords or suspend phone sessions in 1 tap</p></div>' +
       '<a class="btn btn--secondary btn--sm" href="' + esc(CFG.vault.workbooks.auth.url) + '" target="_blank" rel="noopener">Open 01_Auth Sheet &nearr;</a></div>' +
       '<div class="list-stack">' +
       state.data.users
@@ -1167,7 +1261,7 @@
             '<div style="display:flex; gap:6px; align-items:center; flex-wrap:wrap;">' +
             '<span class="badge ' + (u.active !== false ? 'badge--emerald' : 'badge--crimson') + '">' + (u.active !== false ? 'Active' : 'Suspended') + '</span>' +
             '<button type="button" class="btn btn--secondary btn--sm" data-reset-pw="' + esc(u.userId) + '">Reset PW</button>' +
-            (u.role !== 'super_admin'
+            (u.username !== 'PastorJoel'
               ? '<button type="button" class="btn btn--crimson btn--sm" data-toggle-user="' + esc(u.userId) + '">' + (u.active !== false ? 'Suspend' : 'Activate') + '</button>'
               : '') +
             '</div></div>'
@@ -1243,9 +1337,35 @@
   }
 
   // ==========================================================================
-  // EVENT DELEGATION & INTERACTIVE HANDLERS
+  // PILOT TESTER LAUNCHER & EVENT DELEGATION
   // ==========================================================================
+  function launchPilotUserByKey(pilotKey) {
+    const testers = CFG.pilotTesters || [];
+    const found = testers.find(t => t.key === String(pilotKey || '').toLowerCase());
+    if (!found) return false;
+    const preset = CFG.rolePresets[found.role] || CFG.rolePresets.ministry_helper;
+    state.mode = 'staff';
+    state.isSimulated = true;
+    state.user = {
+      userId: 'usr_' + found.key,
+      username: found.username,
+      fullName: found.fullName,
+      role: found.role,
+      allowedModules: preset.defaultModules.slice(),
+      ministryScopes: found.scopes.slice()
+    };
+    state.subTab = '';
+    state.activeTab = 'home';
+    enterShell();
+    showToast('Pilot Mode: ' + found.fullName + ' (' + found.area + ')');
+    return true;
+  }
+
   function bindEvents() {
+    if (window.LFCDeepFeatures) {
+      window.LFCDeepFeatures.bindGlobalModals(state, showToast, callVaultApi, renderMainWorkspace);
+    }
+
     // Theme toggle
     const applyTheme = t => {
       document.documentElement.setAttribute('data-theme', t);
@@ -1289,7 +1409,7 @@
     gasInput.value = state.gasUrl;
     const refreshGasBadge = () => {
       const b = document.getElementById('gas-status-badge');
-      b.textContent = state.gasUrl ? 'Vault Connected ✓' : 'Simulator Ready';
+      b.textContent = state.gasUrl ? 'Vault Connected ✓' : 'Pilot Simulator';
       b.className = 'badge ' + (state.gasUrl ? 'badge--emerald' : 'badge--gold');
     };
     refreshGasBadge();
@@ -1298,28 +1418,13 @@
       state.gasUrl = gasInput.value.trim();
       localStorage.setItem(STORAGE_KEYS.GAS_URL, state.gasUrl);
       refreshGasBadge();
-      showToast(state.gasUrl ? 'Saved Google Apps Script Vault URL!' : 'Cleared endpoint (Simulator mode)');
+      showToast(state.gasUrl ? 'Saved Google Apps Script Vault URL!' : 'Cleared endpoint (Pilot Simulator mode)');
     });
 
-    // Interactive Role Simulator buttons
-    document.querySelectorAll('[data-sim-role]').forEach(btn => {
+    // Pilot Team Quick-Try buttons (Joel, Yaresly, Huney, Wayne, Patricia, Sarah)
+    document.querySelectorAll('[data-pilot-key]').forEach(btn => {
       btn.addEventListener('click', () => {
-        const role = btn.getAttribute('data-sim-role');
-        const simUsers = {
-          super_admin: { userId: 'usr_joel', username: 'PastorJoel', fullName: 'Pastor Joel Newman', role: 'super_admin', allowedModules: ['*'], ministryScopes: ['*'] },
-          treasurer: { userId: 'usr_marie', username: 'marie.treasurer', fullName: 'Marie (Treasurer)', role: 'treasurer', allowedModules: ['dashboard', 'giving', 'accounting', 'friday', 'reports'], ministryScopes: ['All Financial'] },
-          offering_counter: { userId: 'usr_counter', username: 'sunday.counter', fullName: 'Sunday Offering Counter', role: 'offering_counter', allowedModules: ['dashboard', 'giving_batch_entry'], ministryScopes: ['Sunday Worship'] },
-          worship_leader: { userId: 'usr_wayne', username: 'wayne.worship', fullName: 'Wayne Crevoiserat', role: 'worship_leader', allowedModules: ['dashboard', 'worship', 'events', 'schedules'], ministryScopes: ['Sunday Worship'] },
-          worship_team: { userId: 'usr_cameron', username: 'cameron.av', fullName: 'Cameron White', role: 'worship_team', allowedModules: ['dashboard', 'worship_stage', 'schedules_my'], ministryScopes: ['Sunday Worship'] },
-          ministry_helper: { userId: 'usr_patricia', username: 'patricia.cr', fullName: 'Patricia Babb', role: 'ministry_helper', allowedModules: ['dashboard', 'attendance', 'visitors', 'schedules_my'], ministryScopes: ['Celebrate Recovery'] }
-        };
-        state.mode = 'staff';
-        state.isSimulated = true;
-        state.user = simUsers[role];
-        state.subTab = '';
-        state.activeTab = 'home';
-        enterShell();
-        showToast('Previewing ' + CFG.rolePresets[role].label + ' mobile view');
+        launchPilotUserByKey(btn.getAttribute('data-pilot-key'));
       });
     });
 
@@ -1692,12 +1797,89 @@
           showToast((u.active ? 'Reactivated ' : 'Suspended ') + '@' + u.username);
           renderMainWorkspace();
         }
+        return;
+      }
+
+      const copyPilot = ev.target.closest('[data-copy-pilot]');
+      if (copyPilot) {
+        const link = copyPilot.getAttribute('data-copy-pilot');
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          try { await navigator.clipboard.writeText(link); } catch (_) {}
+        }
+        showToast('Copied Pilot Phone Link: ' + link);
+        return;
+      }
+
+      const resolveFb = ev.target.closest('[data-resolve-fb]');
+      if (resolveFb) {
+        const fbId = resolveFb.getAttribute('data-resolve-fb');
+        const item = (state.data.pilotFeedback || []).find(f => f.Feedback_ID === fbId);
+        if (item) item.Status = 'Done';
+        if (state.gasUrl && !state.isSimulated) {
+          await callVaultApi('updatePilotFeedbackStatus', { feedbackId: fbId, status: 'Done' });
+        }
+        showToast('Marked pilot feedback Done!');
+        renderMainWorkspace();
+        return;
+      }
+
+      if (ev.target.id === 'print-stmt-btn') {
+        window.print();
       }
     });
+
+    main.addEventListener('input', ev => {
+      if (ev.target.id === 'dir-search-input') {
+        const pos = ev.target.selectionStart;
+        state.dirQuery = ev.target.value;
+        renderMainWorkspace();
+        const el = document.getElementById('dir-search-input');
+        if (el) {
+          el.focus();
+          try { el.setSelectionRange(pos, pos); } catch (_) {}
+        }
+      }
+    });
+
+    const parseCsvRows = text => {
+      const lines = text.split(/\r?\n/).filter(l => l.trim().length > 0);
+      if (lines.length < 2) return [];
+      const splitLine = line => {
+        const out = [];
+        let cur = '';
+        let inQuotes = false;
+        for (let i = 0; i < line.length; i++) {
+          const ch = line[i];
+          if (ch === '"') {
+            inQuotes = !inQuotes;
+          } else if (ch === ',' && !inQuotes) {
+            out.push(cur.trim());
+            cur = '';
+          } else {
+            cur += ch;
+          }
+        }
+        out.push(cur.trim());
+        return out;
+      };
+      const headers = splitLine(lines[0]);
+      return lines.slice(1).map(ln => {
+        const vals = splitLine(ln);
+        const obj = {};
+        headers.forEach((h, idx) => { obj[h] = vals[idx] || ''; });
+        return obj;
+      });
+    };
 
     main.addEventListener('change', async ev => {
       if (ev.target.id === 'report-month-select') {
         state.reportMonth = ev.target.value;
+        renderMainWorkspace();
+      } else if (ev.target.id === 'dir-status-select') {
+        state.dirStatusFilter = ev.target.value;
+        renderMainWorkspace();
+      } else if (ev.target.id === 'stmt-donor-select') {
+        state.statementDonor = ev.target.value;
         renderMainWorkspace();
       } else if (ev.target.id === 'stage-song-select') {
         state.selectedSongId = ev.target.value;
@@ -1725,6 +1907,55 @@
           state.pendingPhotoName = compressed.name;
           showToast('Photo ready for Google Drive Vault upload: ' + compressed.name);
           if (ev.target.id === 'vis-photo-input') renderMainWorkspace();
+        }
+      } else if (ev.target.id === 'ct-people-csv-input' || ev.target.id === 'ct-giving-csv-input') {
+        const file = ev.target.files && ev.target.files[0];
+        if (file) {
+          const isPeople = ev.target.id === 'ct-people-csv-input';
+          const parsed = parseCsvRows(await file.text());
+          let imported = 0;
+          parsed.forEach((r, idx) => {
+            const fullCheck = JSON.stringify(r).toLowerCase();
+            if (fullCheck.indexOf('cameron white') !== -1) return;
+            if (isPeople) {
+              const fn = r['First Name'] || r.First_Name || (r.Name ? r.Name.split(' ')[0] : '');
+              const ln = r['Last Name'] || r.Last_Name || (r.Name ? r.Name.split(' ').slice(1).join(' ') : '');
+              if (fn || ln) {
+                state.data.people.push({
+                  Person_ID: 'per_csv_' + Date.now() + '_' + idx,
+                  First_Name: fn,
+                  Last_Name: ln,
+                  Member_Status: r['Member Status'] || r.Member_Status || 'Visitor',
+                  Mobile_Phone: r['Mobile Phone'] || r.Phone || '',
+                  Email: r.Email || ''
+                });
+                imported++;
+              }
+            } else {
+              const amt = parseFloat(String(r.Amount || '0').replace(/[^0-9.-]/g, '')) || 0;
+              if (amt > 0) {
+                const gDate = r.Date || r.Gift_Date || '2026-11-23';
+                state.data.contributions.push({
+                  Contribution_ID: 'cnt_csv_' + Date.now() + '_' + idx,
+                  Month_Key: gDate.slice(0, 7),
+                  Gift_Date: gDate,
+                  Batch_ID: state.selectedBatchId,
+                  Donor_Name: r.Name || r.Donor_Name || 'Donor',
+                  Amount: amt,
+                  Category_Code: '10-1001',
+                  Category_Name: r.Category || 'Tithes & Offerings',
+                  Fund_Code: '10',
+                  Payment_Type: r['Payment Type'] || r.Method || 'Check'
+                });
+                imported++;
+              }
+            }
+          });
+          if (state.gasUrl && !state.isSimulated && parsed.length) {
+            await callVaultApi('bulkImportChurchTracCsv', { importType: isPeople ? 'people' : 'giving', rows: parsed });
+          }
+          showToast('Imported ' + imported + ' ChurchTrac ' + (isPeople ? 'People' : 'Giving') + ' rows!');
+          renderMainWorkspace();
         }
       } else if (ev.target.id === 'bank-csv-input') {
         const file = ev.target.files && ev.target.files[0];
@@ -1795,6 +2026,64 @@
         showToast('Saved Visitor Card & updated Monthly Visitor Rollup!');
         ev.target.reset();
         renderMainWorkspace();
+      } else if (fid === 'add-person-form') {
+        const fn = document.getElementById('np-first').value.trim();
+        const ln = document.getElementById('np-last').value.trim();
+        const st = document.getElementById('np-status').value;
+        const ph = document.getElementById('np-phone').value.trim();
+        const pid = 'per_' + Date.now();
+        state.data.people.unshift({
+          Person_ID: pid,
+          First_Name: fn,
+          Last_Name: ln,
+          Member_Status: st,
+          Mobile_Phone: ph,
+          Email: ''
+        });
+        if (state.gasUrl && !state.isSimulated) {
+          await callVaultApi('savePerson', { firstName: fn, lastName: ln, memberStatus: st, mobilePhone: ph });
+        }
+        showToast('Added ' + fn + ' ' + ln + ' (' + st + ') to Vault Directory!');
+        ev.target.reset();
+        renderMainWorkspace();
+      } else if (fid === 'atomic-xfer-form') {
+        const fromBank = document.getElementById('xf-from-bank').value;
+        const toBank = document.getElementById('xf-to-bank').value;
+        const fromFund = document.getElementById('xf-from-fund').value;
+        const toFund = document.getElementById('xf-to-fund').value;
+        const amt = Math.abs(Number(document.getElementById('xf-amount').value || 0));
+        const memo = document.getElementById('xf-memo').value.trim();
+        if (amt > 0) {
+          state.data.ledger.push(
+            {
+              Line_ID: 'ln_xf_out_' + Date.now(),
+              Bank_Account_ID: fromBank,
+              Signed_Cash_Impact: -amt,
+              Payee_Description: 'Transfer Out: ' + memo,
+              Fund_Code: fromFund
+            },
+            {
+              Line_ID: 'ln_xf_in_' + Date.now(),
+              Bank_Account_ID: toBank,
+              Signed_Cash_Impact: amt,
+              Payee_Description: 'Transfer In: ' + memo,
+              Fund_Code: toFund
+            }
+          );
+          if (state.gasUrl && !state.isSimulated) {
+            await callVaultApi('recordAtomicTransfer', {
+              fromBankId: fromBank,
+              toBankId: toBank,
+              fromFundCode: fromFund,
+              toFundCode: toFund,
+              amount: amt,
+              memo: memo
+            });
+          }
+          showToast('Posted balanced ' + fmtMoney(amt) + ' transfer ($0.00 Fund Drift maintained)!');
+          ev.target.reset();
+          renderMainWorkspace();
+        }
       } else if (fid === 'add-gift-form') {
         const donor = document.getElementById('gift-donor').value.trim();
         const amt = Number(document.getElementById('gift-amount').value || 0);
@@ -1938,6 +2227,7 @@
   function mergeServerBootstrap(boot) {
     if (boot.vaultLinks) state.data.vaultLinks = boot.vaultLinks;
     if (Array.isArray(boot.users) && boot.users.length) state.data.users = boot.users;
+    if (Array.isArray(boot.pilotFeedback)) state.data.pilotFeedback = boot.pilotFeedback;
     if (Array.isArray(boot.people) && boot.people.length) state.data.people = boot.people;
     if (Array.isArray(boot.visitors) && boot.visitors.length) state.data.visitors = boot.visitors;
     if (Array.isArray(boot.events) && boot.events.length) state.data.events = boot.events;
@@ -1954,7 +2244,7 @@
     if (Array.isArray(boot.bankFeed)) state.data.bankFeed = boot.bankFeed;
   }
 
-  // Handle URL Query Parameters (?api=..., ?view=connect, ?view=worship, ?rsvp=...)
+  // Handle URL Query Parameters (?pilot=..., ?api=..., ?view=connect, ?view=worship, ?rsvp=...)
   async function initFromUrlAndSession() {
     const params = new URLSearchParams(window.location.search);
     const apiParam = params.get('api');
@@ -1962,6 +2252,11 @@
       state.gasUrl = apiParam.trim();
       localStorage.setItem(STORAGE_KEYS.GAS_URL, state.gasUrl);
       document.getElementById('gas-url-input').value = state.gasUrl;
+    }
+
+    const pilotParam = params.get('pilot');
+    if (pilotParam && launchPilotUserByKey(pilotParam)) {
+      return;
     }
 
     const rsvpTok = params.get('rsvp');

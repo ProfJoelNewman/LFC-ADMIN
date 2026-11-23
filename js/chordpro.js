@@ -1,12 +1,12 @@
 /**
- * LFC Worship Stage Engine — Real-Time 12-Key ChordPro Parser & Transposer
- * Supports slash chords (G/B, D/F#), flats/sharps (Db, Eb, F#, Ab, Bb), and lyrics-only mode.
+ * LFC Worship Stage Engine — Real-Time 12-Key ChordPro Parser, Transposer & Acoustic Capo Calculator
  */
 window.LFCChordPro = (function () {
   const SHARP_SCALE = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
   const FLAT_SCALE = ['C', 'Db', 'D', 'Eb', 'E', 'F', 'Gb', 'G', 'Ab', 'A', 'Bb', 'B'];
   const DISPLAY_KEYS = ['C', 'Db', 'D', 'Eb', 'E', 'F', 'F#', 'G', 'Ab', 'A', 'Bb', 'B'];
   const FLAT_PREFERRED_KEYS = new Set(['F', 'Bb', 'Eb', 'Ab', 'Db', 'Gb']);
+  const EASY_OPEN_SHAPES = ['G', 'C', 'D', 'A', 'E'];
 
   const NOTE_INDEX = {
     C: 0, 'B#': 0,
@@ -51,6 +51,21 @@ window.LFCChordPro = (function () {
       .join('/');
   }
 
+  function getCapoSuggestions(concertKey) {
+    const targetIdx = noteToSemitone(concertKey);
+    if (targetIdx < 0) return [];
+    const options = [];
+    EASY_OPEN_SHAPES.forEach(shapeKey => {
+      const shapeIdx = noteToSemitone(shapeKey);
+      const fret = (targetIdx - shapeIdx + 12) % 12;
+      if (fret >= 1 && fret <= 7) {
+        options.push({ fret: fret, shapeKey: shapeKey, label: 'Capo ' + fret + ' (Play ' + shapeKey + ' shapes)' });
+      }
+    });
+    options.sort((a, b) => a.fret - b.fret);
+    return options;
+  }
+
   function escapeHtml(str) {
     return String(str || '')
       .replace(/&/g, '&amp;')
@@ -74,21 +89,18 @@ window.LFCChordPro = (function () {
         htmlLines.push('<div class="cp-spacer"></div>');
         continue;
       }
-
       if (line.indexOf('[') === -1) {
         htmlLines.push('<div class="cp-lyric-only">' + escapeHtml(line) + '</div>');
         continue;
       }
-
       if (!showChords) {
         const stripped = line.replace(/\[[^\]]+\]/g, '');
         htmlLines.push('<div class="cp-lyric-only">' + escapeHtml(stripped) + '</div>');
         continue;
       }
 
-      // Build aligned chord-over-lyric segments
       const regex = /\[([^\]]+)\]([^\[]*)/g;
-      let prefix = line.slice(0, line.indexOf('['));
+      const prefix = line.slice(0, line.indexOf('['));
       let rowHtml = '<div class="cp-pair-line">';
       if (prefix) {
         rowHtml += '<span class="cp-pair"><span class="cp-chord">&nbsp;</span><span class="cp-lyric">' + escapeHtml(prefix) + '</span></span>';
@@ -112,6 +124,7 @@ window.LFCChordPro = (function () {
   return {
     DISPLAY_KEYS: DISPLAY_KEYS,
     transposeChordToken: transposeChordToken,
+    getCapoSuggestions: getCapoSuggestions,
     renderChartHtml: renderChartHtml
   };
 })();

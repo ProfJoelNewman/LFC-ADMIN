@@ -32,17 +32,19 @@ const VAULT_IDS = {
     RECEIPTS: '1Q0JGOEupY6gubT78NTWy-QQKZlMKlhUi',
     VISITOR_SCANS: '1W65fpiV2EX6Zrg1SyrkX-jGEa_wQ4PVn',
     WORSHIP_CHORDS: '1feqF2lCtZcwEhJ_8u2IvJtYCVoSGPfiy',
-    MONTH_END_PDFS: '1C0xRVDHaLaU-OzCQJES-vOUq4FAdvGfY'
+    MONTH_END_PDFS: '1C0xRVDHaLaU-OzCQJES-vOUq4FAdvGfY',
+    CHURCHTRAC_DROPZONE: '1qSUCWiupvYBP9RxO_i7BXTzYvAxOsdv-'
   }
 };
 
 const ROLE_MODULES = {
   super_admin: ['*'],
   treasurer: ['dashboard', 'giving', 'accounting', 'reports', 'friday'],
+  board_member: ['dashboard', 'reports', 'schedules_my'],
   offering_counter: ['dashboard', 'giving_batch_entry'],
-  worship_leader: ['dashboard', 'worship', 'events', 'schedules'],
+  worship_leader: ['dashboard', 'worship', 'worship_stage', 'events', 'schedules'],
   worship_team: ['dashboard', 'worship_stage', 'schedules_my'],
-  ministry_helper: ['dashboard', 'attendance', 'visitors', 'schedules_my']
+  ministry_helper: ['dashboard', 'attendance', 'schedules_my']
 };
 
 /**
@@ -134,6 +136,9 @@ function doPost(e) {
     }
     if (action === 'createStripeCheckout') {
       return jsonResponse_(handleCreateStripeCheckout_(body));
+    }
+    if (action === 'submitPilotFeedback' && !body.sessionToken) {
+      return jsonResponse_(withScriptLock_(() => handleSubmitPilotFeedback_(body, null)));
     }
 
     // 2. Authenticated Session Gate
@@ -233,6 +238,37 @@ function doPost(e) {
     }
     if (action === 'uploadVaultFile') {
       return jsonResponse_(withScriptLock_(() => handleUploadVaultFile_(body, session)));
+    }
+    if (action === 'submitPilotFeedback') {
+      return jsonResponse_(withScriptLock_(() => handleSubmitPilotFeedback_(body, session)));
+    }
+    if (action === 'updatePilotFeedbackStatus') {
+      if (session.role !== 'super_admin') {
+        return jsonResponse_({ ok: false, error: 'Super Admin required.' });
+      }
+      return jsonResponse_(withScriptLock_(() => handleUpdatePilotFeedbackStatus_(body, session)));
+    }
+    if (action === 'recordManualTransaction') {
+      requireModule_(session, ['accounting']);
+      return jsonResponse_(withScriptLock_(() => handleRecordManualTransaction_(body, session)));
+    }
+    if (action === 'recordAtomicTransfer') {
+      requireModule_(session, ['accounting']);
+      return jsonResponse_(withScriptLock_(() => handleRecordAtomicTransfer_(body, session)));
+    }
+    if (action === 'deleteOutlineItem') {
+      requireModule_(session, ['worship']);
+      return jsonResponse_(withScriptLock_(() => handleDeleteOutlineItem_(body, session)));
+    }
+    if (action === 'createCalendarEvent') {
+      requireModule_(session, ['events', 'worship']);
+      return jsonResponse_(withScriptLock_(() => handleCreateCalendarEvent_(body, session)));
+    }
+    if (action === 'bulkImportChurchTracCsv') {
+      if (session.role !== 'super_admin' && session.role !== 'treasurer') {
+        return jsonResponse_({ ok: false, error: 'Super Admin or Treasurer required for bulk CSV imports.' });
+      }
+      return jsonResponse_(withScriptLock_(() => handleBulkImportCsv_(body, session)));
     }
 
     return jsonResponse_({ ok: false, error: 'Unsupported action: ' + action });
@@ -545,13 +581,16 @@ function handleBootstrapApp_(session, forceRefresh) {
     apBills: [],
     bankFeed: [],
     fridayMatrix: [],
+    recurringSchedules: [],
+    pilotFeedback: [],
     users: []
   };
 
   const isSuper = session.role === 'super_admin';
+  const isBoard = session.role === 'board_member';
 
   // Workbook 02: People, Events, Attendance & Month-End Attendance/Visitor Rollups
-  if (isSuper || hasAnyModule_(session, ['attendance', 'visitors', 'events', 'schedules', 'schedules_my', 'giving', 'giving_batch_entry'])) {
+  if (isSuper || isBoard || hasAnyModule_(session, ['attendance', 'visitors', 'events', 'schedules', 'schedules_my', 'giving', 'giving_batch_entry'])) {
     const wb02 = SpreadsheetApp.openById(getVaultId_('WB02_PEOPLE'));
     payload.events = sheetToObjects_(wb02.getSheetByName('Events_Calendar'));
 
@@ -563,19 +602,23 @@ function handleBootstrapApp_(session, forceRefresh) {
       payload.groups = sheetToObjects_(wb02.getSheetByName('Ministry_Groups'));
       payload.attendanceSessions = sheetToObjects_(wb02.getSheetByName('Attendance_Sessions'));
       payload.pastoralTasks = sheetToObjects_(wb02.getSheetByName('Pastoral_Care_Tasks'));
+    } else if (isBoard) {
+      // Church Board Member (e.g. Patricia Babb): Month-End/APR executive summaries only; zero Pastoral Notes or individual Giving!
+      payload.reports.monthlyAttendance = readReportTable_(wb02.getSheetByName('REPORT_Monthly_Attendance'), 9, 22);
+      payload.reports.visitorsApr = readReportTable_(wb02.getSheetByName('REPORT_Visitors_&_APR_Growth'), 9, 22);
     } else if (hasAnyModule_(session, ['attendance', 'visitors'])) {
       const allGroups = sheetToObjects_(wb02.getSheetByName('Ministry_Groups'));
       payload.groups = filterByMinistryScope_(allGroups, session.ministryScopes, ['Ministry_Category', 'Group_Name']);
       const allSessions = sheetToObjects_(wb02.getSheetByName('Attendance_Sessions'));
       payload.attendanceSessions = filterByMinistryScope_(allSessions, session.ministryScopes, ['Ministry_Category', 'Group_Name']);
       payload.visitors = filterByMinistryScope_(sheetToObjects_(wb02.getSheetByName('Visitors_Connect')), session.ministryScopes, ['Ministry_Source']);
-      // Minimal roster names only (zero sensitive notes/emails for unscoped helpers)
       payload.people = sheetToObjects_(wb02.getSheetByName('People_Directory')).map(p => ({
         Person_ID: p.Person_ID,
         First_Name: p.First_Name,
         Last_Name: p.Last_Name,
         Member_Status: p.Member_Status,
-        Age_Category: p.Age_Category
+        Age_Category: p.Age_Category,
+        Mobile_Phone: p.Mobile_Phone
       }));
     } else if (hasAnyModule_(session, ['giving', 'giving_batch_entry', 'worship', 'schedules'])) {
       payload.people = sheetToObjects_(wb02.getSheetByName('People_Directory')).map(p => ({
@@ -591,31 +634,40 @@ function handleBootstrapApp_(session, forceRefresh) {
   // Workbook 03: Worship Songs, Outlines & Volunteer Schedules
   if (isSuper || hasAnyModule_(session, ['worship', 'worship_stage', 'schedules', 'schedules_my'])) {
     const wb03 = SpreadsheetApp.openById(getVaultId_('WB03_WORSHIP'));
-    payload.songs = sheetToObjects_(wb03.getSheetByName('Songs_Library'));
-    payload.outlines = sheetToObjects_(wb03.getSheetByName('Service_Outlines'));
-    payload.teamsRoles = sheetToObjects_(wb03.getSheetByName('Volunteer_Teams_Roles'));
+    if (isSuper || hasAnyModule_(session, ['worship', 'worship_stage'])) {
+      payload.songs = sheetToObjects_(wb03.getSheetByName('Songs_Library'));
+      payload.outlines = sheetToObjects_(wb03.getSheetByName('Service_Outlines'));
+      payload.teamsRoles = sheetToObjects_(wb03.getSheetByName('Volunteer_Teams_Roles'));
+    }
     const allSched = sheetToObjects_(wb03.getSheetByName('Volunteer_Schedules'));
     if (isSuper || hasAnyModule_(session, ['worship', 'schedules'])) {
       payload.schedules = allSched;
     } else {
       payload.schedules = allSched.filter(s =>
+        String(s.Helper_Username || '').toLowerCase() === String(session.username || '').toLowerCase() ||
         String(s.Helper_Name || '').toLowerCase().indexOf(session.fullName.split(' ')[0].toLowerCase()) !== -1
       );
     }
   }
 
   // Workbook 04: Giving, Accounting, AP Bills, Bank Feeds & Month-End Financial Rollups
-  if (isSuper || hasAnyModule_(session, ['giving', 'giving_batch_entry', 'accounting', 'reports', 'friday'])) {
+  if (isSuper || isBoard || hasAnyModule_(session, ['giving', 'giving_batch_entry', 'accounting', 'reports', 'friday'])) {
     const wb04 = SpreadsheetApp.openById(getVaultId_('WB04_FINANCE'));
     payload.coa = sheetToObjects_(wb04.getSheetByName('Chart_of_Accounts'));
     payload.funds = sheetToObjects_(wb04.getSheetByName('Funds'));
 
     if (session.role === 'offering_counter') {
-      // Offering Counter ONLY sees unlocked batches & entries in those batches
       const openBatches = sheetToObjects_(wb04.getSheetByName('Giving_Batches')).filter(b => String(b.Locked) !== 'Yes');
       const openIds = openBatches.map(b => b.Batch_ID);
       payload.givingBatches = openBatches;
       payload.contributions = sheetToObjects_(wb04.getSheetByName('Contributions')).filter(c => openIds.indexOf(c.Batch_ID) !== -1);
+    } else if (isBoard) {
+      // Board Member sees aggregate monthly giving, WEF/District apportionments, and Bank/Fund balances — NEVER individual donor names!
+      payload.reports.monthlyGiving = readReportTable_(wb04.getSheetByName('REPORT_Monthly_Giving'), 9, 22);
+      payload.reports.bankHealth = readReportTable_(wb04.getSheetByName('REPORT_Fund_&_Budget_Health'), 5, 10);
+      payload.reports.fundHealth = readReportTable_(wb04.getSheetByName('REPORT_Fund_&_Budget_Health'), 13, 19);
+      payload.bankAccounts = sheetToObjects_(wb04.getSheetByName('Bank_Accounts'));
+      payload.apBills = sheetToObjects_(wb04.getSheetByName('AP_Bills_Inbox'));
     } else {
       payload.reports.monthlyGiving = readReportTable_(wb04.getSheetByName('REPORT_Monthly_Giving'), 9, 22);
       payload.reports.bankHealth = readReportTable_(wb04.getSheetByName('REPORT_Fund_&_Budget_Health'), 5, 10);
@@ -627,6 +679,7 @@ function handleBootstrapApp_(session, forceRefresh) {
       payload.apBills = sheetToObjects_(wb04.getSheetByName('AP_Bills_Inbox'));
       payload.bankFeed = sheetToObjects_(wb04.getSheetByName('Bank_Feed_Staging'));
       payload.fridayMatrix = sheetToObjects_(wb04.getSheetByName('Friday_Treasurer_Matrix'));
+      payload.recurringSchedules = sheetToObjects_(wb04.getSheetByName('Recurring_Giving_Schedules'));
     }
   }
 
@@ -634,6 +687,7 @@ function handleBootstrapApp_(session, forceRefresh) {
     const wb01 = SpreadsheetApp.openById(getVaultId_('WB01_AUTH'));
     payload.vaultLinks.wb01Auth = 'https://docs.google.com/spreadsheets/d/' + getVaultId_('WB01_AUTH') + '/edit';
     payload.users = listSafeUsers_(wb01.getSheetByName('Users').getDataRange().getValues());
+    payload.pilotFeedback = sheetToObjects_(wb01.getSheetByName('Pilot_Feedback_Log'));
   }
 
   try {
@@ -1195,7 +1249,7 @@ function handleSaveFridayMatrix_(body, session) {
   const rows = sh.getDataRange().getValues();
   const rowPayload = [
     fDate,
-    String(body.treasurerName || 'Marie (Treasurer)'),
+    String(body.treasurerName || 'Dee "Huney" Huchton'),
     session.fullName,
     Number(body.generalCushion || 1500),
     Number(body.schoolCushion || 5000),
@@ -1273,6 +1327,46 @@ function handleSaveOutlineItem_(body, session) {
   return { ok: true, itemId: oid };
 }
 
+function handleDeleteOutlineItem_(body, session) {
+  const wb03 = SpreadsheetApp.openById(getVaultId_('WB03_WORSHIP'));
+  const sh = wb03.getSheetByName('Service_Outlines');
+  const rows = sh.getDataRange().getValues();
+  for (let i = 1; i < rows.length; i++) {
+    if (String(rows[i][0]) === String(body.itemId)) {
+      sh.deleteRow(i + 1);
+      SpreadsheetApp.flush();
+      invalidateUserCache_(session);
+      return { ok: true };
+    }
+  }
+  return { ok: false, error: 'Outline item not found.' };
+}
+
+function handleCreateCalendarEvent_(body, session) {
+  const wb02 = SpreadsheetApp.openById(getVaultId_('WB02_PEOPLE'));
+  const sh = wb02.getSheetByName('Events_Calendar');
+  const eid = 'ev_' + randomHex_(5);
+  sh.appendRow([
+    eid,
+    String(body.title || '').trim(),
+    String(body.ministryScope || 'Sunday Worship'),
+    String(body.eventDate || todayYmd_()),
+    String(body.helperArrival || '09:45'),
+    String(body.startTime || '10:30'),
+    String(body.endTime || '12:00'),
+    String(body.location || 'Worship Center'),
+    body.publishedPublic === false ? 'No' : 'Yes',
+    body.isWorshipService ? 'Yes' : 'No',
+    String(body.topic || ''),
+    body.registrationOpen ? 'Yes' : 'No',
+    Number(body.capacity || 0),
+    String(body.description || '')
+  ]);
+  SpreadsheetApp.flush();
+  invalidateUserCache_(session);
+  return { ok: true, eventId: eid };
+}
+
 function handleAssignVolunteer_(body, session) {
   const wb03 = SpreadsheetApp.openById(getVaultId_('WB03_WORSHIP'));
   const sh = wb03.getSheetByName('Volunteer_Schedules');
@@ -1284,7 +1378,7 @@ function handleAssignVolunteer_(body, session) {
     String(body.eventDate || todayYmd_()),
     String(body.eventTitle || 'Sunday Worship'),
     String(body.roleId || ''),
-    String(body.personId || ''),
+    String(body.helperUsername || ''),
     String(body.helperName || ''),
     String(body.roleTitle || ''),
     'Invited',
@@ -1375,6 +1469,171 @@ function handleUploadVaultFile_(body, session) {
     String(body.base64 || '')
   );
   return { ok: true, fileUrl: url };
+}
+
+function handleRecordManualTransaction_(body, session) {
+  const wb04 = SpreadsheetApp.openById(getVaultId_('WB04_FINANCE'));
+  const ledSh = wb04.getSheetByName('Bank_Ledger_Splits');
+  const txDate = String(body.txDate || todayYmd_());
+  const txType = body.txType === 'deposit' ? 'deposit' : 'expense';
+  const rawAmt = Math.abs(Number(body.amount || 0));
+  const signed = txType === 'deposit' ? rawAmt : -rawAmt;
+  let receiptUrl = '';
+  if (body.photoBase64) {
+    receiptUrl = saveBase64ToFolder_(
+      VAULT_IDS.FOLDERS.RECEIPTS,
+      body.photoFilename || ('Receipt_' + txDate + '.jpg'),
+      body.photoMimeType || 'image/jpeg',
+      body.photoBase64
+    );
+  }
+  const txId = 'tx_man_' + randomHex_(5);
+  ledSh.appendRow([
+    'ln_' + randomHex_(5),
+    txId,
+    txDate.slice(0, 7),
+    txDate,
+    String(body.bankAccountId || 'bnk_boa_9284'),
+    txType,
+    signed,
+    String(body.payee || '').trim(),
+    String(body.categoryCode || '10-5202'),
+    String(body.categoryName || 'Manual Entry'),
+    String(body.fundCode || '10'),
+    'Cleared',
+    body.needsReceipt && !receiptUrl ? 'Yes' : 'No',
+    String(body.receiptAssignee || ''),
+    receiptUrl,
+    '',
+    String(body.memo || ''),
+    'No'
+  ]);
+  SpreadsheetApp.flush();
+  invalidateUserCache_(session);
+  return { ok: true, txId: txId, receiptUrl: receiptUrl };
+}
+
+/**
+ * Atomic Two-Legged Bank/Fund Transfer — Permanently eliminates ChurchTrac's $8,109.92 GL Xfer Drift!
+ */
+function handleRecordAtomicTransfer_(body, session) {
+  const wb04 = SpreadsheetApp.openById(getVaultId_('WB04_FINANCE'));
+  const ledSh = wb04.getSheetByName('Bank_Ledger_Splits');
+  const txDate = String(body.txDate || todayYmd_());
+  const amt = Math.abs(Number(body.amount || 0));
+  if (amt <= 0) return { ok: false, error: 'Transfer amount must be greater than $0.00.' };
+
+  const fromBank = String(body.fromBankId || 'bnk_boa_9284');
+  const toBank = String(body.toBankId || fromBank);
+  const fromFund = String(body.fromFundCode || '10');
+  const toFund = String(body.toFundCode || fromFund);
+  const memo = String(body.memo || 'Atomic Bank/Fund Transfer');
+  const txId = 'tx_xfer_' + randomHex_(5);
+
+  ledSh.appendRow([
+    'ln_' + randomHex_(5), txId, txDate.slice(0, 7), txDate, fromBank, 'transfer_out',
+    -amt, 'Transfer Out -> ' + toBank + ' (Fund ' + toFund + ')', 'XFER-OUT', 'Inter-Account/Fund Transfer',
+    fromFund, 'Cleared', 'No', '', '', '', memo, 'No'
+  ]);
+  ledSh.appendRow([
+    'ln_' + randomHex_(5), txId, txDate.slice(0, 7), txDate, toBank, 'transfer_in',
+    amt, 'Transfer In <- ' + fromBank + ' (Fund ' + fromFund + ')', 'XFER-IN', 'Inter-Account/Fund Transfer',
+    toFund, 'Cleared', 'No', '', '', '', memo, 'No'
+  ]);
+  SpreadsheetApp.flush();
+  invalidateUserCache_(session);
+  return { ok: true, txId: txId };
+}
+
+function handleSubmitPilotFeedback_(body, session) {
+  const wb01 = SpreadsheetApp.openById(getVaultId_('WB01_AUTH'));
+  let sh = wb01.getSheetByName('Pilot_Feedback_Log');
+  if (!sh) {
+    sh = wb01.insertSheet('Pilot_Feedback_Log');
+    sh.appendRow([
+      'Feedback_ID', 'Submitted_At', 'Reviewer_Name', 'Reviewer_Username',
+      'Reviewer_Role', 'Screen_Module', 'Feedback_Type', 'Priority',
+      'Suggestion_or_Issue', 'Status', 'Admin_Response'
+    ]);
+  }
+  const fbId = 'fb_' + randomHex_(5);
+  sh.appendRow([
+    fbId,
+    new Date().toISOString(),
+    String(body.reviewerName || (session && session.fullName) || 'Pilot Tester'),
+    String(body.reviewerUsername || (session && session.username) || 'pilot'),
+    String(body.reviewerRole || (session && session.role) || 'tester'),
+    String(body.screenModule || 'General'),
+    String(body.feedbackType || 'Feature Needed'),
+    String(body.priority || 'Normal'),
+    String(body.message || '').trim(),
+    'Open',
+    ''
+  ]);
+  SpreadsheetApp.flush();
+  if (session) invalidateUserCache_(session);
+  return { ok: true, feedbackId: fbId };
+}
+
+function handleUpdatePilotFeedbackStatus_(body, session) {
+  const wb01 = SpreadsheetApp.openById(getVaultId_('WB01_AUTH'));
+  const sh = wb01.getSheetByName('Pilot_Feedback_Log');
+  if (!sh) return { ok: false, error: 'Pilot_Feedback_Log sheet not found.' };
+  const rows = sh.getDataRange().getValues();
+  for (let i = 1; i < rows.length; i++) {
+    if (String(rows[i][0]) === String(body.feedbackId)) {
+      sh.getRange(i + 1, 10).setValue(String(body.status || 'Planned'));
+      if (body.adminResponse != null) {
+        sh.getRange(i + 1, 11).setValue(String(body.adminResponse));
+      }
+      SpreadsheetApp.flush();
+      invalidateUserCache_(session);
+      return { ok: true };
+    }
+  }
+  return { ok: false, error: 'Feedback item not found.' };
+}
+
+function handleBulkImportCsv_(body, session) {
+  const importType = String(body.importType || 'people');
+  const rows = Array.isArray(body.rows) ? body.rows : [];
+  let added = 0;
+
+  if (importType === 'people') {
+    const wb02 = SpreadsheetApp.openById(getVaultId_('WB02_PEOPLE'));
+    const pSh = wb02.getSheetByName('People_Directory');
+    const existingNames = pSh.getDataRange().getValues().map(r => (String(r[2]) + ' ' + String(r[3])).trim().toLowerCase());
+    rows.forEach(r => {
+      const full = (String(r.firstName || '') + ' ' + String(r.lastName || '')).trim();
+      if (full && existingNames.indexOf(full.toLowerCase()) === -1 && full.toLowerCase().indexOf('cameron white') === -1) {
+        pSh.appendRow([
+          'p_imp_' + randomHex_(4), '', r.firstName || '', r.lastName || '',
+          r.memberStatus || 'Affiliated', 'Yes', 'Adult', 'Adults', '', '',
+          r.birthDate || '', r.phone || '', r.email || '', 'Both', '', '', '', r.notes || 'CSV Import', 'No'
+        ]);
+        added++;
+      }
+    });
+  } else if (importType === 'giving') {
+    const wb04 = SpreadsheetApp.openById(getVaultId_('WB04_FINANCE'));
+    const cSh = wb04.getSheetByName('Contributions');
+    rows.forEach(r => {
+      const amt = Number(r.amount || 0);
+      const dt = String(r.date || todayYmd_());
+      if (amt !== 0) {
+        cSh.appendRow([
+          'cnt_imp_' + randomHex_(4), dt.slice(0, 7), dt, 'bat_csv_import', '',
+          String(r.donorName || 'Imported Donor'), amt, String(r.categoryCode || '10-1001'),
+          String(r.categoryName || 'Tithes & General Offerings'), String(r.fundCode || '10'),
+          String(r.paymentType || 'Check'), String(r.checkRef || ''), 'Yes', String(r.memo || 'CSV Import'), 'No'
+        ]);
+        added++;
+      }
+    });
+  }
+  SpreadsheetApp.flush();
+  invalidateUserCache_(session);
+  return { ok: true, importedCount: added };
 }
 
 // ============================================================================

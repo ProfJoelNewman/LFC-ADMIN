@@ -1,10 +1,11 @@
-const CACHE_NAME = 'lfc-hub-shell-v2';
+const CACHE_NAME = 'lfc-hub-shell-v2.1';
 const SHELL_ASSETS = [
   './',
   './index.html',
   './css/app.css',
   './js/config.js',
   './js/chordpro.js',
+  './js/deep-features.js',
   './js/app.js',
   './manifest.json',
   './icons/shield-badge.png',

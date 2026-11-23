@@ -19,7 +19,6 @@
   <link rel="icon" type="image/png" sizes="192x192" href="./icons/icon-192.png" />
   <link rel="apple-touch-icon" sizes="180x180" href="./icons/apple-touch-icon.png" />
 
-  <!-- Typography matching deltonanaz.com -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800&amp;family=Quicksand:wght@500;600;700&amp;family=Righteous&amp;display=swap" rel="stylesheet" />
@@ -28,18 +27,17 @@
 </head>
 <body>
   <!-- ========================================================================
-       1. SIGN-IN & PORTAL SWITCHER SCREEN (#auth-screen)
+       1. SIGN-IN, PILOT TESTER LAUNCHER & PORTAL SWITCHER (#auth-screen)
        ======================================================================== -->
   <main id="auth-screen" class="auth-screen">
     <div class="auth-card">
       <div class="auth-brand">
         <img src="./icons/shield-badge.png" alt="Life Fellowship Church Shield Emblem" class="auth-shield" width="68" height="68" />
-        <span class="eyebrow-tag">DELTONANAZ.COM &bull; MOBILE CHMS</span>
+        <span class="eyebrow-tag">DELTONANAZ.COM &bull; MOBILE CHMS v2.1</span>
         <h1 id="portal-main-heading" class="auth-title">LFC MINISTRY HUB</h1>
-        <p id="portal-sub-heading" class="auth-sub">Sign in with your unique Ministry Helper or Admin account</p>
+        <p id="portal-sub-heading" class="auth-sub">Sign in with your unique Ministry Helper, Treasurer, or Super Admin account</p>
       </div>
 
-      <!-- Entry Mode Switcher (Helper Login | Public Connect | Worship Stage) -->
       <div class="portal-mode-Row" role="tablist" aria-label="Portal Access Mode">
         <button type="button" id="mode-btn-staff" class="mode-tab-btn is-active" data-entry-mode="staff">Helper Login</button>
         <button type="button" id="mode-btn-connect" class="mode-tab-btn" data-entry-mode="connect">Public Connect</button>
@@ -48,7 +46,6 @@
 
       <div id="auth-alert" class="alert-box alert-box--error" role="alert" hidden></div>
 
-      <!-- Staff / Ministry Helper Login Form -->
       <form id="staff-login-form" novalidate>
         <div class="field">
           <label for="login-username" class="field-label">Username or Email</label>
@@ -56,7 +53,7 @@
             type="text"
             id="login-username"
             class="input"
-            placeholder="e.g. PastorJoel or patricia.cr"
+            placeholder="e.g. PastorJoel, yaresly.godwin, huney.treasurer"
             autocomplete="username"
             autocapitalize="none"
             spellcheck="false"
@@ -93,11 +90,11 @@
       <details id="gas-endpoint-drawer" style="margin-top: 14px; border-top: 1px solid var(--border-subtle); padding-top: 12px;">
         <summary style="cursor: pointer; font-family: var(--font-ui); font-size: 11.5px; font-weight: 700; color: var(--text-secondary); display: flex; justify-content: space-between; align-items: center;">
           <span>Google Drive Vault Sync Endpoint</span>
-          <span id="gas-status-badge" class="badge badge--gold">Configure / Simulator</span>
+          <span id="gas-status-badge" class="badge badge--gold">Pilot Simulator</span>
         </summary>
         <div style="margin-top: 10px;">
           <p style="margin: 0 0 8px; font-size: 12px; color: var(--text-muted);">
-            Connect your Google Apps Script v2.0 Web App URL bound to <strong>LFC Church Management System Vault</strong> in Google Drive:
+            Connect your Google Apps Script Web App URL bound to <strong>LFC Church Management System Vault</strong>:
           </p>
           <input
             type="url"
@@ -111,26 +108,26 @@
         </div>
       </details>
 
-      <!-- Interactive Mobile Role Previewer (Test all 6 Helper Scopes before/during setup) -->
+      <!-- Pilot Team Role Launcher (Exact LFC Leadership & Helpers) -->
       <details id="role-simulator-drawer" open style="margin-top: 12px; border-top: 1px solid var(--border-subtle); padding-top: 12px;">
         <summary style="cursor: pointer; font-family: var(--font-ui); font-size: 11.5px; font-weight: 700; color: var(--gold);">
-          Preview Mobile Views by Role (Interactive Demo)
+          Pilot Team Quick-Try &amp; Feedback Mode
         </summary>
         <p style="margin: 6px 0 8px; font-size: 12px; color: var(--text-muted);">
-          Tap any role below to test exactly what that helper sees on their phone:
+          Tap your name/role below to try your mobile screens &amp; submit feedback:
         </p>
         <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px;">
-          <button type="button" id="sim-super-admin" class="btn btn--secondary btn--sm" data-sim-role="super_admin">1. Super Admin</button>
-          <button type="button" id="sim-treasurer" class="btn btn--secondary btn--sm" data-sim-role="treasurer">2. Treasurer</button>
-          <button type="button" id="sim-counter" class="btn btn--secondary btn--sm" data-sim-role="offering_counter">3. Offering Counter</button>
-          <button type="button" id="sim-worship-lead" class="btn btn--secondary btn--sm" data-sim-role="worship_leader">4. Worship Planner</button>
-          <button type="button" id="sim-musician" class="btn btn--secondary btn--sm" data-sim-role="worship_team">5. Musician Chords</button>
-          <button type="button" id="sim-helper" class="btn btn--secondary btn--sm" data-sim-role="ministry_helper">6. CR / Kids Helper</button>
+          <button type="button" id="sim-joel" class="btn btn--secondary btn--sm" data-pilot-key="joel">Pastor Joel (Super Admin)</button>
+          <button type="button" id="sim-yaresly" class="btn btn--secondary btn--sm" data-pilot-key="yaresly">Yaresly Godwin (Super Admin)</button>
+          <button type="button" id="sim-huney" class="btn btn--secondary btn--sm" data-pilot-key="huney">Dee "Huney" (Treasurer)</button>
+          <button type="button" id="sim-wayne" class="btn btn--secondary btn--sm" data-pilot-key="wayne">Wayne Crev (Worship Head)</button>
+          <button type="button" id="sim-patricia" class="btn btn--secondary btn--sm" data-pilot-key="patricia">Patricia Babb (Board)</button>
+          <button type="button" id="sim-sarah" class="btn btn--secondary btn--sm" data-pilot-key="sarah">Sarah Gulick (Kids Helper)</button>
         </div>
       </details>
 
-      <div style="margin-top: 16px; display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: var(--text-muted);">
-        <button type="button" id="pwa-install-btn" class="icon-chip">Install Phone App</button>
+      <div style="margin-top: 16px; display: flex; justify-content: space-between; align-items: center; gap: 6px; flex-wrap: wrap; font-size: 12px; color: var(--text-muted);">
+        <button type="button" id="open-install-guide-btn" class="icon-chip" style="border-color: var(--gold-line); color: var(--gold);">📲 Install on Phone</button>
         <button type="button" id="auth-theme-btn" class="icon-chip">Daylight / Dark</button>
         <a href="https://www.deltonanaz.com" rel="noopener">deltonanaz.com &rarr;</a>
       </div>
@@ -138,7 +135,7 @@
   </main>
 
   <!-- ========================================================================
-       2. AUTHENTICATED / PUBLIC / STAGE APP SHELL (#app-shell)
+       2. AUTHENTICATED / PILOT / PUBLIC APP SHELL (#app-shell)
        ======================================================================== -->
   <div id="app-shell" class="app-layout" hidden>
     <header class="app-topbar">
@@ -155,6 +152,7 @@
         </div>
 
         <div class="topbar-controls">
+          <button type="button" id="topbar-install-btn" class="icon-chip" title="Install App on Phone Home Screen">📲 Install</button>
           <button type="button" id="sync-refresh-btn" class="icon-chip" title="Sync with Google Drive Vault">Sync</button>
           <button type="button" id="theme-toggle-btn" class="icon-chip" title="Toggle Daylight or Stage Dark Theme">Theme</button>
           <button type="button" id="sign-out-btn" class="icon-chip" style="color: #FCA5A5;">Exit</button>
@@ -162,11 +160,10 @@
       </div>
     </header>
 
-    <!-- First-Login Password Update Banner -->
     <div id="force-pw-modal" class="workspace-body" hidden>
       <section class="card card--action-hero">
         <h2 class="card-title">Set Your Personal Password</h2>
-        <p class="card-subtitle">Your Super Admin provisioned a temporary password. Choose your private password (8+ characters) to continue.</p>
+        <p class="card-subtitle">Choose your private password (8+ characters) to unlock your LFC Hub account.</p>
         <form id="change-pw-form" style="margin-top: 12px;">
           <div class="field">
             <label for="new-personal-pw" class="field-label">New Private Password</label>
@@ -177,10 +174,99 @@
       </section>
     </div>
 
-    <!-- Responsive Shell: Left Rail on Desktop, Bottom Nav on Mobile -->
     <div id="workspace-shell" class="workspace-shell">
       <nav id="role-bottom-nav" class="bottom-nav" aria-label="Primary Ministry Navigation"></nav>
       <main id="workspace-main" class="workspace-body"></main>
+    </div>
+
+    <!-- Floating Pilot Tester Feedback Button (Present on Every Screen!) -->
+    <button type="button" id="fab-open-feedback" class="fab-feedback-btn" title="Send feedback or request a change on this screen">
+      💬 Suggest Change
+    </button>
+  </div>
+
+  <!-- ========================================================================
+       3. PHONE INSTALL GUIDE MODAL (iPhone Safari + Android Chrome)
+       ======================================================================== -->
+  <div id="install-modal" class="modal-backdrop" hidden>
+    <div class="modal-sheet">
+      <div class="card-head">
+        <div>
+          <span class="eyebrow-tag">PHONE HOME SCREEN APP</span>
+          <h2 class="card-title" style="margin-top:6px;">Install LFC Hub on Your Phone</h2>
+        </div>
+        <button type="button" id="close-install-modal" class="icon-chip">Close ✕</button>
+      </div>
+      <div id="native-install-wrap" style="margin-bottom:12px;" hidden>
+        <button type="button" id="trigger-native-install-btn" class="btn btn--gold btn--full">📲 Tap Here for 1-Click Android/Chrome Install</button>
+      </div>
+      <div class="list-stack">
+        <div class="list-row">
+          <div class="list-row__main">
+            <div class="list-row__title">🍏 iPhone / iPad (Safari)</div>
+            <div class="list-row__meta">
+              1. Open this link in <strong>Safari</strong>.<br />
+              2. Tap the <strong>Share</strong> icon (square with upward arrow <code>&uarr;</code>) at the bottom.<br />
+              3. Scroll down and tap <strong>"Add to Home Screen"</strong> &rarr; <strong>Add</strong>.
+            </div>
+          </div>
+        </div>
+        <div class="list-row">
+          <div class="list-row__main">
+            <div class="list-row__title">🤖 Android (Chrome)</div>
+            <div class="list-row__meta">
+              1. Tap the <strong>3-dots menu (&#8942;)</strong> in the top-right corner of Chrome.<br />
+              2. Tap <strong>"Install app"</strong> or <strong>"Add to Home screen"</strong>.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================================
+       4. PILOT TESTER FEEDBACK & CHANGE REQUEST MODAL
+       ======================================================================== -->
+  <div id="feedback-modal" class="modal-backdrop" hidden>
+    <div class="modal-sheet">
+      <div class="card-head">
+        <div>
+          <span class="eyebrow-tag">PILOT TEAM INPUT</span>
+          <h2 class="card-title" style="margin-top:6px;">Suggest a Change or Improvement</h2>
+          <p id="fb-context-label" class="card-subtitle">Logs straight to Pastor Joel &amp; Yaresly's Pilot Feedback Inbox</p>
+        </div>
+        <button type="button" id="close-feedback-modal" class="icon-chip">Close ✕</button>
+      </div>
+      <form id="pilot-feedback-form">
+        <div class="form-grid-2">
+          <div class="field">
+            <label class="field-label" for="fb-reviewer">Your Name</label>
+            <input id="fb-reviewer" class="input" required />
+          </div>
+          <div class="field">
+            <label class="field-label" for="fb-type">Feedback Type</label>
+            <select id="fb-type" class="select">
+              <option>Feature / Button Needed</option>
+              <option>Change Layout / Wording</option>
+              <option>Something Feels Confusing</option>
+              <option>Bug / Fix Needed</option>
+              <option>Love How This Works!</option>
+            </select>
+          </div>
+        </div>
+        <div class="field">
+          <label class="field-label" for="fb-priority">Priority</label>
+          <select id="fb-priority" class="select">
+            <option value="Must-Have Before Launch">Must-Have Before Launch</option>
+            <option value="Nice to Have">Nice to Have</option>
+          </select>
+        </div>
+        <div class="field">
+          <label class="field-label" for="fb-message">What should we add, simplify, or change?</label>
+          <textarea id="fb-message" class="textarea" placeholder="Tell us what would make your weekly ministry task faster or easier on your phone..." required></textarea>
+        </div>
+        <button type="submit" class="btn btn--gold btn--full">Send Feedback to Vault Inbox</button>
+      </form>
     </div>
   </div>
 
@@ -188,6 +274,7 @@
 
   <script src="./js/config.js"></script>
   <script src="./js/chordpro.js"></script>
+  <script src="./js/deep-features.js"></script>
   <script src="./js/app.js"></script>
 </body>
 </html>
