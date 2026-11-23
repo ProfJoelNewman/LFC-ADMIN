@@ -1,4 +1,4 @@
-const CACHE_NAME = 'lfc-hub-shell-v2.1';
+const CACHE_NAME = 'lfc-hub-shell-v2.1.1';
 const SHELL_ASSETS = [
   './',
   './index.html',

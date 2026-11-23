@@ -588,9 +588,10 @@ function handleBootstrapApp_(session, forceRefresh) {
 
   const isSuper = session.role === 'super_admin';
   const isBoard = session.role === 'board_member';
+  const isMinDir = session.role === 'ministry_director';
 
   // Workbook 02: People, Events, Attendance & Month-End Attendance/Visitor Rollups
-  if (isSuper || isBoard || hasAnyModule_(session, ['attendance', 'visitors', 'events', 'schedules', 'schedules_my', 'giving', 'giving_batch_entry'])) {
+  if (isSuper || isBoard || isMinDir || hasAnyModule_(session, ['attendance', 'visitors', 'events', 'schedules', 'schedules_my', 'giving', 'giving_batch_entry'])) {
     const wb02 = SpreadsheetApp.openById(getVaultId_('WB02_PEOPLE'));
     payload.events = sheetToObjects_(wb02.getSheetByName('Events_Calendar'));
 
@@ -606,6 +607,21 @@ function handleBootstrapApp_(session, forceRefresh) {
       // Church Board Member (e.g. Patricia Babb): Month-End/APR executive summaries only; zero Pastoral Notes or individual Giving!
       payload.reports.monthlyAttendance = readReportTable_(wb02.getSheetByName('REPORT_Monthly_Attendance'), 9, 22);
       payload.reports.visitorsApr = readReportTable_(wb02.getSheetByName('REPORT_Visitors_&_APR_Growth'), 9, 22);
+    } else if (isMinDir) {
+      // Ministry Director (April Newman — Children's, SHIELD & SCA): Attendance, Kids Check-In, Visitors, Schedules & Attendance/Visitor Reports (zero church banking!)
+      payload.reports.monthlyAttendance = readReportTable_(wb02.getSheetByName('REPORT_Monthly_Attendance'), 9, 22);
+      payload.reports.visitorsApr = readReportTable_(wb02.getSheetByName('REPORT_Visitors_&_APR_Growth'), 9, 22);
+      payload.groups = sheetToObjects_(wb02.getSheetByName('Ministry_Groups'));
+      payload.attendanceSessions = sheetToObjects_(wb02.getSheetByName('Attendance_Sessions'));
+      payload.visitors = sheetToObjects_(wb02.getSheetByName('Visitors_Connect'));
+      payload.people = sheetToObjects_(wb02.getSheetByName('People_Directory')).map(p => ({
+        Person_ID: p.Person_ID,
+        First_Name: p.First_Name,
+        Last_Name: p.Last_Name,
+        Member_Status: p.Member_Status,
+        Age_Category: p.Age_Category,
+        Mobile_Phone: p.Mobile_Phone
+      }));
     } else if (hasAnyModule_(session, ['attendance', 'visitors'])) {
       const allGroups = sheetToObjects_(wb02.getSheetByName('Ministry_Groups'));
       payload.groups = filterByMinistryScope_(allGroups, session.ministryScopes, ['Ministry_Category', 'Group_Name']);
@@ -632,7 +648,7 @@ function handleBootstrapApp_(session, forceRefresh) {
   }
 
   // Workbook 03: Worship Songs, Outlines & Volunteer Schedules
-  if (isSuper || hasAnyModule_(session, ['worship', 'worship_stage', 'schedules', 'schedules_my'])) {
+  if (isSuper || isMinDir || hasAnyModule_(session, ['worship', 'worship_stage', 'schedules', 'schedules_my'])) {
     const wb03 = SpreadsheetApp.openById(getVaultId_('WB03_WORSHIP'));
     if (isSuper || hasAnyModule_(session, ['worship', 'worship_stage'])) {
       payload.songs = sheetToObjects_(wb03.getSheetByName('Songs_Library'));
@@ -640,7 +656,7 @@ function handleBootstrapApp_(session, forceRefresh) {
       payload.teamsRoles = sheetToObjects_(wb03.getSheetByName('Volunteer_Teams_Roles'));
     }
     const allSched = sheetToObjects_(wb03.getSheetByName('Volunteer_Schedules'));
-    if (isSuper || hasAnyModule_(session, ['worship', 'schedules'])) {
+    if (isSuper || isMinDir || hasAnyModule_(session, ['worship', 'schedules'])) {
       payload.schedules = allSched;
     } else {
       payload.schedules = allSched.filter(s =>
@@ -650,8 +666,8 @@ function handleBootstrapApp_(session, forceRefresh) {
     }
   }
 
-  // Workbook 04: Giving, Accounting, AP Bills, Bank Feeds & Month-End Financial Rollups
-  if (isSuper || isBoard || hasAnyModule_(session, ['giving', 'giving_batch_entry', 'accounting', 'reports', 'friday'])) {
+  // Workbook 04: Giving, Accounting, AP Bills, Bank Feeds & Month-End Financial Rollups (Explicitly excluded for ministry_director!)
+  if (!isMinDir && (isSuper || isBoard || hasAnyModule_(session, ['giving', 'giving_batch_entry', 'accounting', 'reports', 'friday']))) {
     const wb04 = SpreadsheetApp.openById(getVaultId_('WB04_FINANCE'));
     payload.coa = sheetToObjects_(wb04.getSheetByName('Chart_of_Accounts'));
     payload.funds = sheetToObjects_(wb04.getSheetByName('Funds'));
