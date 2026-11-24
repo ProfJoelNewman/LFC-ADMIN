@@ -14,9 +14,12 @@ window.LFC_CHMS_CONFIG = {
   churchPhone: '(386) 574-7828',
   churchSiteUrl: 'https://www.deltonanaz.com',
   wordpressAdminUrl: 'https://www.deltonanaz.com/admin-use/',
-  version: '2.1.0',
+  version: '2.1.2',
 
-  // Paste deployed Google Apps Script Web App /exec URL here (or save via login drawer)
+  // Live Zero-Setup Cloud Relay for Pilot Tester Feedback (syncs across phones & into Google Drive Vault)
+  pilotFeedbackRelayTopic: 'lfc_pilot_fb_f80a6af71f9792ceba9a61d1a097',
+
+  // Optional Google Apps Script Web App /exec URL (for full multi-user password login & Plaid/Stripe webhooks)
   defaultGasWebAppUrl: '',
 
   vault: {

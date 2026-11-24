@@ -1557,17 +1557,20 @@
 
     // Sync refresh
     document.getElementById('sync-refresh-btn').addEventListener('click', async () => {
+      if (window.LFCDeepFeatures && window.LFCDeepFeatures.syncLivePilotFeedback) {
+        await window.LFCDeepFeatures.syncLivePilotFeedback(state, renderMainWorkspace);
+      }
       if (state.gasUrl && state.sessionToken && !state.isSimulated) {
         const boot = await callVaultApi('bootstrapApp', { forceRefresh: true });
         if (boot.ok) {
           mergeServerBootstrap(boot);
           renderMainWorkspace();
-          showToast('Synced live with Google Drive Vault!');
+          showToast('Synced live with Google Drive Vault & Feedback Relay!');
           return;
         }
       }
       renderMainWorkspace();
-      showToast('Recalculated Month-End & APR Vault rollups');
+      showToast('Synced live Pilot Feedback & recalculated Vault rollups!');
     });
 
     // Bottom Navigation clicks
@@ -1578,6 +1581,9 @@
       state.subTab = '';
       renderNavBar(getNavTabsForCurrentSession());
       renderMainWorkspace();
+      if (state.activeTab === 'admin_users' && window.LFCDeepFeatures && window.LFCDeepFeatures.syncLivePilotFeedback) {
+        window.LFCDeepFeatures.syncLivePilotFeedback(state, renderMainWorkspace);
+      }
       window.scrollTo({ top: 0, behavior: 'smooth' });
     });
 
@@ -1868,11 +1874,22 @@
         const fbId = resolveFb.getAttribute('data-resolve-fb');
         const item = (state.data.pilotFeedback || []).find(f => f.Feedback_ID === fbId);
         if (item) item.Status = 'Done';
+        if (window.LFCDeepFeatures && window.LFCDeepFeatures.publishFeedbackStatusUpdate) {
+          await window.LFCDeepFeatures.publishFeedbackStatusUpdate(fbId, 'Done');
+        }
         if (state.gasUrl && !state.isSimulated) {
           await callVaultApi('updatePilotFeedbackStatus', { feedbackId: fbId, status: 'Done' });
         }
         showToast('Marked pilot feedback Done!');
         renderMainWorkspace();
+        return;
+      }
+
+      if (ev.target.id === 'refresh-pilot-fb-btn') {
+        if (window.LFCDeepFeatures && window.LFCDeepFeatures.syncLivePilotFeedback) {
+          const merged = await window.LFCDeepFeatures.syncLivePilotFeedback(state, renderMainWorkspace);
+          showToast('Checked live relay (' + merged.length + ' total feedback items)');
+        }
         return;
       }
 
