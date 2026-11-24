@@ -1,9 +1,11 @@
 /**
- * LFC HUB v2.1 — Deep Module Extensions, Pilot Phone Installer, Feedback Inbox & CSV Importer
+ * LFC HUB v2.1.2 — Deep Module Extensions, Pilot Phone Installer, Live Cloud Feedback Relay & CSV Importer
  */
 window.LFCDeepFeatures = (function () {
   'use strict';
 
+  const FB_INBOX_KEY = 'lfc_pilot_fb_inbox_v1';
+  const MY_SUBS_KEY = 'lfc_my_pilot_submissions_v1';
   let deferredInstallPrompt = null;
 
   window.addEventListener('beforeinstallprompt', ev => {
@@ -13,7 +15,116 @@ window.LFCDeepFeatures = (function () {
     if (wrap) wrap.hidden = false;
   });
 
-  function renderPilotShareAndFeedbackAdmin(state, esc, showToast, callVaultApi, refreshUi) {
+  function getRelayBaseUrl() {
+    const topic = window.LFC_CHMS_CONFIG && window.LFC_CHMS_CONFIG.pilotFeedbackRelayTopic;
+    return topic ? 'https://ntfy.sh/' + encodeURIComponent(topic) : '';
+  }
+
+  function loadJsonStorage(key, fallback) {
+    try {
+      const raw = localStorage.getItem(key);
+      return raw ? JSON.parse(raw) : fallback;
+    } catch (_) {
+      return fallback;
+    }
+  }
+
+  function saveJsonStorage(key, val) {
+    try {
+      localStorage.setItem(key, JSON.stringify(val));
+    } catch (_) {}
+  }
+
+  async function syncLivePilotFeedback(state, renderMainWorkspace) {
+    const relayUrl = getRelayBaseUrl();
+    const cached = loadJsonStorage(FB_INBOX_KEY, []);
+    const byId = new Map();
+
+    cached.forEach(item => {
+      if (item && item.Feedback_ID) byId.set(item.Feedback_ID, item);
+    });
+    (state.data.pilotFeedback || []).forEach(item => {
+      if (item && item.Feedback_ID) byId.set(item.Feedback_ID, item);
+    });
+
+    if (relayUrl) {
+      try {
+        const resp = await fetch(relayUrl + '/json?poll=1&since=12h', { cache: 'no-store' });
+        if (resp.ok) {
+          const text = await resp.text();
+          const seenRemoteIds = new Set();
+          const statusUpdates = new Map();
+
+          text.split(/\r?\n/).filter(Boolean).forEach(line => {
+            try {
+              const env = JSON.parse(line);
+              if (env.event !== 'message' || !env.message) return;
+              const payload = JSON.parse(env.message);
+              if (payload && payload.type === 'status_update' && payload.Feedback_ID) {
+                statusUpdates.set(payload.Feedback_ID, payload.Status || 'Done');
+              } else if (payload && payload.Feedback_ID && payload.Suggestion_or_Issue) {
+                seenRemoteIds.add(payload.Feedback_ID);
+                const prev = byId.get(payload.Feedback_ID);
+                byId.set(payload.Feedback_ID, Object.assign({}, payload, prev && prev.Status === 'Done' ? { Status: 'Done' } : {}));
+              }
+            } catch (_) {}
+          });
+
+          statusUpdates.forEach((st, id) => {
+            const existing = byId.get(id);
+            if (existing) existing.Status = st;
+          });
+
+          // Re-hydrate any locally submitted items from this device if >12h expired on public relay
+          const mySubs = loadJsonStorage(MY_SUBS_KEY, []);
+          for (let i = 0; i < mySubs.length; i++) {
+            const sub = mySubs[i];
+            if (sub && sub.Feedback_ID && !seenRemoteIds.has(sub.Feedback_ID)) {
+              byId.set(sub.Feedback_ID, sub);
+              try {
+                await fetch(relayUrl, {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'text/plain;charset=UTF-8' },
+                  body: JSON.stringify(sub)
+                });
+              } catch (_) {}
+            }
+          }
+        }
+      } catch (_) {}
+    }
+
+    const merged = Array.from(byId.values()).sort((a, b) =>
+      String(a.Submitted_At || '').localeCompare(String(b.Submitted_At || ''))
+    );
+    state.data.pilotFeedback = merged;
+    saveJsonStorage(FB_INBOX_KEY, merged);
+    if (renderMainWorkspace && state.activeTab === 'admin_users') {
+      renderMainWorkspace();
+    }
+    return merged;
+  }
+
+  async function publishFeedbackStatusUpdate(feedbackId, status) {
+    const cached = loadJsonStorage(FB_INBOX_KEY, []);
+    cached.forEach(item => {
+      if (item && item.Feedback_ID === feedbackId) item.Status = status;
+    });
+    saveJsonStorage(FB_INBOX_KEY, cached);
+
+    const relayUrl = getRelayBaseUrl();
+    if (relayUrl) {
+      try {
+        await fetch(relayUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=UTF-8' },
+          body: JSON.stringify({ type: 'status_update', Feedback_ID: feedbackId, Status: status })
+        });
+      } catch (_) {}
+    }
+  }
+
+  function renderPilotShareAndFeedbackAdmin(state, esc) {
     const baseUrl = window.location.origin + window.location.pathname;
     const testers = window.LFC_CHMS_CONFIG.pilotTesters || [];
     const fbRows = state.data.pilotFeedback || [];
@@ -50,15 +161,18 @@ window.LFCDeepFeatures = (function () {
               '</div>'
           )
           .join('')
-      : '<div class="alert-box alert-box--info">No pilot feedback items submitted yet. Testers tap "💬 Suggest Change" on any phone screen!</div>';
+      : '<div class="alert-box alert-box--info">Live Cloud Feedback Relay is active ✓ — No tester recommendations submitted yet. As soon as any tester taps "💬 Suggest Change" on their phone, it appears right here!</div>';
 
     return (
       '<section class="card">' +
-      '<span class="eyebrow-tag">PILOT PHONE ROLLOUT &amp; FEEDBACK</span>' +
+      '<span class="eyebrow-tag">PILOT PHONE ROLLOUT &amp; LIVE CLOUD FEEDBACK</span>' +
       '<h2 class="card-title" style="margin-top:6px;">Invite Leaders to Install &amp; Test on Their Phone</h2>' +
-      '<p class="card-subtitle" style="margin-bottom:12px;">Send each person their tailored link below — they can add LFC Hub to their phone home screen and tap <strong>💬 Suggest Change</strong> anywhere.</p>' +
+      '<p class="card-subtitle" style="margin-bottom:12px;">Send each person their tailored link below — they can add LFC Hub to their phone Home Screen and tap <strong>💬 Suggest Change</strong> anywhere (delivered live automatically!).</p>' +
       '<div class="list-stack" style="margin-bottom:14px;">' + testerCards + '</div>' +
-      '<h3 class="card-title" style="font-size:0.95rem; margin-bottom:8px;">Pilot Tester Feedback Inbox (' + fbRows.length + ')</h3>' +
+      '<div class="card-head" style="margin-bottom:8px;">' +
+      '<h3 class="card-title" style="font-size:0.95rem;">Pilot Tester Feedback Inbox (' + fbRows.length + ')</h3>' +
+      '<button type="button" id="refresh-pilot-fb-btn" class="btn btn--secondary btn--sm">🔄 Check New Feedback</button>' +
+      '</div>' +
       '<div class="list-stack">' + fbHtml + '</div>' +
       '</section>' +
       '<section class="card">' +
@@ -130,6 +244,9 @@ window.LFCDeepFeatures = (function () {
   }
 
   function bindGlobalModals(state, showToast, callVaultApi, renderMainWorkspace) {
+    // Immediately hydrate & sync live cloud feedback on app start
+    syncLivePilotFeedback(state, renderMainWorkspace);
+
     const installModal = document.getElementById('install-modal');
     const fbModal = document.getElementById('feedback-modal');
 
@@ -170,12 +287,18 @@ window.LFCDeepFeatures = (function () {
     if (fbForm) {
       fbForm.addEventListener('submit', async ev => {
         ev.preventDefault();
+        const submitBtn = fbForm.querySelector('button[type="submit"]');
+        if (submitBtn) {
+          submitBtn.disabled = true;
+          submitBtn.textContent = 'Sending Live to Pastor Joel...';
+        }
+
         const reviewer = document.getElementById('fb-reviewer').value.trim();
         const fbType = document.getElementById('fb-type').value;
         const prio = document.getElementById('fb-priority').value;
         const msg = document.getElementById('fb-message').value.trim();
         const newEntry = {
-          Feedback_ID: 'fb_' + Date.now(),
+          Feedback_ID: 'fb_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6),
           Submitted_At: new Date().toISOString(),
           Reviewer_Name: reviewer,
           Reviewer_Username: (state.user && state.user.username) || 'pilot',
@@ -186,8 +309,29 @@ window.LFCDeepFeatures = (function () {
           Suggestion_or_Issue: msg,
           Status: 'Open'
         };
+
         state.data.pilotFeedback = state.data.pilotFeedback || [];
         state.data.pilotFeedback.push(newEntry);
+
+        // Save locally for durable re-hydration & offline safety
+        const mySubs = loadJsonStorage(MY_SUBS_KEY, []);
+        mySubs.push(newEntry);
+        saveJsonStorage(MY_SUBS_KEY, mySubs);
+        saveJsonStorage(FB_INBOX_KEY, state.data.pilotFeedback);
+
+        // 1. Live Zero-Setup Cloud Relay (works immediately across all pilot phones!)
+        const relayUrl = getRelayBaseUrl();
+        if (relayUrl) {
+          try {
+            await fetch(relayUrl, {
+              method: 'POST',
+              headers: { 'Content-Type': 'text/plain;charset=UTF-8' },
+              body: JSON.stringify(newEntry)
+            });
+          } catch (_) {}
+        }
+
+        // 2. Also send to Google Apps Script Vault if configured
         if (state.gasUrl) {
           try {
             await callVaultApi('submitPilotFeedback', {
@@ -199,9 +343,14 @@ window.LFCDeepFeatures = (function () {
             });
           } catch (_) {}
         }
+
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'Send Feedback to Vault Inbox';
+        }
         fbModal.hidden = true;
         ev.target.reset();
-        showToast('Thank you! Feedback logged in Pastor Joel & Yaresly\'s Vault Inbox.');
+        showToast('Sent! Your feedback is now live in Pastor Joel & Yaresly\'s Inbox.');
         if (state.activeTab === 'admin_users') renderMainWorkspace();
       });
     }
@@ -210,6 +359,8 @@ window.LFCDeepFeatures = (function () {
   return {
     renderPilotShareAndFeedbackAdmin: renderPilotShareAndFeedbackAdmin,
     renderAtomicTransferAndTaxStatement: renderAtomicTransferAndTaxStatement,
-    bindGlobalModals: bindGlobalModals
+    bindGlobalModals: bindGlobalModals,
+    syncLivePilotFeedback: syncLivePilotFeedback,
+    publishFeedbackStatusUpdate: publishFeedbackStatusUpdate
   };
 })();
